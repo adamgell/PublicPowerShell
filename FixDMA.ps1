@@ -180,6 +180,7 @@ using System.Runtime.InteropServices;
 }
 
 Take-Ownership -Path "Registry::HKLM\SYSTEM\CurrentControlSet\Control\DmaSecurity\AllowedBuses" -User $env:USERNAME -Recurse
+
 #take ownership of key
 <#
 The following DMA (Direct Memory Access) capable devices are not declared as protected from external access, 
