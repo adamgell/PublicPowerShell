@@ -1,3 +1,5 @@
+<#pulled from https://www.itsecguy.com/fixing_unquoted/#>
+
 $BaseKeys = "HKLM:\System\CurrentControlSet\Services",                                  #Services
             "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall",                #32bit Uninstalls
             "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall"     #64bit Uninstalls
