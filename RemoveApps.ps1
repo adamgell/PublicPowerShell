@@ -13,5 +13,5 @@ $pathstoremove = "C:\Program Files\WindowsApps\Microsoft.MSPaint_1.0.46.0_x64__8
 foreach ($path in $pathstoremove) {
     Write-Host "Removing $path"
     Remove-AppxProvisionedPackage -Online -PackageName $path -AllUsers | Out-Null
-    Remove-AppxPackage -Online -Package $path | Out-Null
+    Remove-AppxProvisionedPackage -Online -Package $path | Out-Null
 }
