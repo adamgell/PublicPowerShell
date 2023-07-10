@@ -21,7 +21,8 @@ Get-AppxProvisionedPackage –online | where-object {$_.packagename –like "Pac
 $ErrorActionPreference = 'Continue'
 
 Start-Transcript -Path "$env:TEMP\$($(Split-Path $PSCommandPath -Leaf).ToLower().Replace(".ps1",".log"))" -Append
-$pathstoremove = "C:\Program Files\WindowsApps\Microsoft.MSPaint_1.0.46.0_x64__8wekyb3d8bbwe", "C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.12.10983.0_x64__8wekyb3d8bbwe"
+$pathstoremove = $pathstoremove = "C:\Program Files\WindowsApps\Microsoft.MSPaint_1.0.46.0_x64__8wekyb3d8bbwe","C:\Program Files\WindowsApps\Microsoft.WindowsTerminal_1.12.10983.0_x64__8wekyb3d8bbwe","C:\Program Files\WindowsApps\Microsoft.Microsoft3DViewer_1.0.95.0_x64__8wekyb3d8bbwe","C:\Program Files\WindowsApps\Microsoft.Print3D_3.3.791.0_x64__8wekyb3d8bbwe","C:\Program Files\WindowsApps\Microsoft.HEVCVideoExtension_1.0.23254.0_x64__8wekyb3d8bbwe"
+
 foreach ($path in $pathstoremove) {
     $app = Split-Path -Path $path -Leaf
     Write-Host "Querying for Application ... $app"
