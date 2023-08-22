@@ -18,12 +18,17 @@ Start-Transcript "$TempDir\Remediate-Teams.log" -Append -Force -ErrorAction Sile
 Write-Output $win32app
 try {
     #find teams.exe in localappdata
-    $teams = Get-ChildItem -Path $env:LOCALAPPDATA\Microsoft\Teams -Filter Update.exe -Recurse -Force | Select-Object -First 1
+    $teams = Get-ChildItem -Path $env:LOCALAPPDATA\Microsoft\Teams -Filter Update.exe -Recurse -Force -ErrorAction SilentlyContinue | Select-Object -First 1
     $teamsFullName = $teams.FullName
     $teamsDirectory = $teams.DirectoryName
     #find teams.exe in program files and start it so it installs to $localappdata
     $teamsProgramFiles = Get-ChildItem -Path ${env:ProgramFiles(x86)} -Filter Teams.exe -Recurse -Force -ErrorAction SilentlyContinue | Select-Object -First 1
     $teamsProgramFilesFullName = $teamsProgramFiles.FullName
+
+    if ($null -eq $teamsProgramFiles) {
+        Write-Host "Teams.exe not found in program files"
+        break;
+    }
 
     Write-Host "Found Teams.exe at $teamsFullName"
     if ($null -eq $teamsFullName) {
