@@ -34,7 +34,7 @@ try {
     if ($null -eq $teamsFullName) {
         Write-Host "Teams.exe not found"
         Write-Host "attempting to launch teams from the program files location"
-        Start-Process $teamsProgramFilesFullName
+        break;
     }
     
     Write-Host "Teams.exe found"
@@ -57,6 +57,7 @@ try {
         $Shortcut.TargetPath = "$teamsFullName"
         $Shortcut.Arguments = "--processStart Teams.exe"
         $Shortcut.WorkingDirectory = "$teamsDirectory"
+
         $Shortcut.Save()
     }
 
