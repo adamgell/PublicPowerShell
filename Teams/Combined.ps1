@@ -27,18 +27,14 @@ try {
 
     if ($null -eq $teamsProgramFiles) {
         Write-Host "Teams.exe not found in program files"
-        break;
+        Exit 1
     }
 
-    Write-Host "Found Teams.exe at $teamsFullName"
     if ($null -eq $teamsFullName) {
-        Write-Host "Teams.exe not found"
-        Write-Host "attempting to launch teams from the program files location"
-        break;
+        Write-Host "Teams.exe not found in local appdata"
+        Exit 1
     }
-    
-    Write-Host "Teams.exe found"
-    
+        
     #start teams
     Start-Process -FilePath $teamsFullName -ArgumentList "--processStart Teams.exe" -ErrorAction SilentlyContinue
 
