@@ -25,7 +25,7 @@ try {
     $teamsProgramFiles = Get-ChildItem -Path ${env:ProgramFiles(x86)} -Filter Teams.exe -Recurse -Force -ErrorAction SilentlyContinue | Select-Object -First 1
     $teamsProgramFilesFullName = $teamsProgramFiles.FullName
 
-    if ($null -eq $teamsProgramFiles -or $null -eq $teamsFullName) {
+    if ($null -eq $teams -or $null -eq $teamsProgramFiles) {
         Write-Host "Teams not found in localappdata or program files, exiting"
         Exit 1
     }
