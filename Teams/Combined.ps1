@@ -25,17 +25,15 @@ try {
     $teamsProgramFiles = Get-ChildItem -Path ${env:ProgramFiles(x86)} -Filter Teams.exe -Recurse -Force -ErrorAction SilentlyContinue | Select-Object -First 1
     $teamsProgramFilesFullName = $teamsProgramFiles.FullName
 
-    if ($null -eq $teamsProgramFiles) {
-        Write-Host "Teams.exe not found in program files"
+    if ($null -eq $teamsProgramFiles -or $null -eq $teamsFullName) {
+        Write-Host "Teams not found in localappdata or program files, exiting"
         Exit 1
     }
 
-    if ($null -eq $teamsFullName) {
-        Write-Host "Teams.exe not found in local appdata"
-        Exit 1
-    }
+
         
     #start teams
+    
     Start-Process -FilePath $teamsFullName -ArgumentList "--processStart Teams.exe" -ErrorAction SilentlyContinue
 
     $Desktop = (Get-ItemProperty -path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" -name "Desktop").Desktop
