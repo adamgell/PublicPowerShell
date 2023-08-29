@@ -14,10 +14,10 @@ Use the “Detect-RemoveStoreMail.ps1”as the detection script.
 
 Make sure the "Install Behavior" is set to User. 
 
-![3ecc1608-0255-4c0e-9792-690437c0b1ae](file:///C:/Users/admin/OneDrive/Pictures/Typedown/3ecc1608-0255-4c0e-9792-690437c0b1ae.png)
+![3ecc1608-0255-4c0e-9792-690437c0b1ae](3ecc1608-0255-4c0e-9792-690437c0b1ae.png)
 
 ### Detection
 
 Use the “Detect-RemoveStoreMail.ps1”as the detection script.
 
-![e6cceb8f-8207-4907-8ab6-9ae7537d42f7](file:///C:/Users/admin/OneDrive/Pictures/Typedown/e6cceb8f-8207-4907-8ab6-9ae7537d42f7.png)
+![e6cceb8f-8207-4907-8ab6-9ae7537d42f7](e6cceb8f-8207-4907-8ab6-9ae7537d42f7.png)
