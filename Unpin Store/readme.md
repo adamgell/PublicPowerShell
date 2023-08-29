@@ -21,3 +21,7 @@ Make sure the "Install Behavior" is set to User.
 Use the “Detect-RemoveStoreMail.ps1”as the detection script.
 
 ![e6cceb8f-8207-4907-8ab6-9ae7537d42f7](e6cceb8f-8207-4907-8ab6-9ae7537d42f7.png)
+
+
+### Video
+![video](video.gif)
