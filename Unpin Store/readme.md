@@ -10,7 +10,7 @@ Use the “Detect-RemoveStoreMail.ps1”as the detection script.
 
 **Uninstall command**: none / empty 
 
-![a0e81564-7df4-4df6-9ec9-3115bba06765](file:///C:/Users/admin/OneDrive/Pictures/Typedown/a0e81564-7df4-4df6-9ec9-3115bba06765.png)
+![a0e81564-7df4-4df6-9ec9-3115bba06765](a0e81564-7df4-4df6-9ec9-3115bba06765.png)
 
 Make sure the "Install Behavior" is set to User. 
 
