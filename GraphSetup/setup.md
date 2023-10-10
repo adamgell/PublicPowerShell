@@ -38,7 +38,7 @@ Microsoft Graph Command Line Tools (it may be listed as Microsoft Graph PowerShe
 
 After you login, you will see the following popup: 
 
-![https://andrewstaylor.com/wp-content/uploads/2023/06/image-10.png](https://andrewstaylor.com/wp-content/uploads/2023/06/image-10.png)
+![permissions box for autopilot script](https://github.com/adamgell/PublicPowerShell/blob/main/GraphSetup/images/perm_check.png)
 
 Make sure you check the box that says “consent on behalf..” if this isn’t checked then each time you or the team import a hash. They will need access to accept these permissions. Usually that is accessible by the global administrator role. 
 
@@ -48,10 +48,10 @@ We can then close the powershell window after accepting the permissions. We don�
 
 If we navigate to Azure AD and click on Enterprise Applications, we can see the app in there:
 
-![Microsoft Graph Command Line Tools](https://andrewstaylor.com/wp-content/uploads/2023/06/image-5.png)
+![Microsoft Graph Command Line Tools](https://github.com/adamgell/PublicPowerShell/blob/main/GraphSetup/images/applist.png)
 
 Microsoft Graph Command Line Tools
 
 Now in the enterprise app, the permissions are setup for any one configured with permission to use the app. We can add users or groups and those folks will be able to upload any computer to Autopilot. 
 
-![Untitled](Graph%20setup%204cafe5302df04bc7a6596c9fdbd0608c/Untitled.png)
+![user list section(https://github.com/adamgell/PublicPowerShell/blob/main/GraphSetup/images/users.png)
