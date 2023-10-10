@@ -32,7 +32,7 @@ These are required so you are covered if you also use the “-group” parameter
 
 You’ll be prompted to login to your tenant:
 
-![images\login.png]
+![.\images\login.png]
 
 Microsoft Graph Command Line Tools (it may be listed as Microsoft Graph PowerShell on some tenants) which are used by the SDK to run commands needs to setup an Application within your Azure Active Directory with the permissions selected earlier:
 
