@@ -54,4 +54,4 @@ Microsoft Graph Command Line Tools
 
 Now in the enterprise app, the permissions are setup for any one configured with permission to use the app. We can add users or groups and those folks will be able to upload any computer to Autopilot. 
 
-![user list section(https://github.com/adamgell/PublicPowerShell/blob/main/GraphSetup/images/users.png)
+![user list section](https://github.com/adamgell/PublicPowerShell/blob/main/GraphSetup/images/users.png)
