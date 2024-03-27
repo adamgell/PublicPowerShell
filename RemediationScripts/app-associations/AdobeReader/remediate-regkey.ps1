@@ -3,7 +3,7 @@ Version: 1.0
 #>
 
 Try {
-    Start-Process .\SetUserFTA.exe -ArgumentList ".url InternetShortcut" -Wait -NoNewWindow
+    Start-Process "C:\temp\SetUserFTA.exe" -ArgumentList ".pdf, Acrobat.Document.DC" -Wait -NoNewWindow
 } 
 Catch {
     Write-Warning "Not Compliant $_"
@@ -12,11 +12,3 @@ Catch {
 finally {
     Exit 0
 }
-    
-
-
-
-
-
-
- 

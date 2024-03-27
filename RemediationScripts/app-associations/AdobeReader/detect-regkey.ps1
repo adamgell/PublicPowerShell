@@ -8,7 +8,7 @@ Try {
     if($TestPath){
         Write-Host "File already exists"
     } else {
-        $URI = "https://publiclogo.blob.core.windows.net/logo/SetUserFTA.exe"
+        $URI = "https://github.com/adamgell/PublicPowerShell/raw/main/RemediationScripts/app-associations/SetUserFTA.exe"
         invoke-webrequest -uri $URI -outfile "C:\temp\SetUserFTA.exe"
     }
     
@@ -29,7 +29,7 @@ Try {
     }
     
     # Value you want to search for
-    $searchValue = ".url"
+    $searchValue = ".pdf"
     
     # Check if the value exists
     $found = $false
