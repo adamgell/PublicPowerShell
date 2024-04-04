@@ -8,7 +8,7 @@ $infPath = "C:\Windows\INF"
 $infFiles = Get-ChildItem -Path $infPath -Filter "OEM*.inf"
 
 # Regex pattern to match DriverVer lines
-$pattern = "DriverVer=.*,${targetDriverVersion}"
+$pattern = "HP\s+Universal\s+Printing\s+PCL\s+6"
 
 # Iterate over each file and search for the target driver version
 foreach ($file in $infFiles) {
