@@ -132,23 +132,19 @@ function InitializeTpm {
     # Initialize TPM, add recovery partition if needed and enable Bitlocker
     Initialize-Tpm -AllowClear -AllowPhysicalPresence
     BdeHdCfg -target $env:SystemDrive shrink -quiet
-    Enable-BitLocker -MountPoint $env:SystemDrive -RecoveryPasswordProtector -SkipHardwareTest
+    Enable-BitLocker -MountPoint $env:SystemDrive -RecoveryPasswordProtector -SkipHardwareTest -UsedSpaceOnly:$false
     Write-Log -Message "TPM initialized, recovery partition added if needed and Bitlocker enabled." -Severity Info
-
+    
     while ((Get-BitLockerVolume -MountPoint $env:SystemDrive -ErrorAction SilentlyContinue).VolumeStatus -eq "EncryptionInProgress") {
         Write-Host "Encryption is in progress..."
         Write-Host "Drive $drive is encrypting. Checking again in 60 seconds."
         Start-Sleep -Seconds 60
+        if ((Get-BitLockerVolume -MountPoint $env:SystemDrive -ErrorAction SilentlyContinue).VolumeStatus -eq "FullyEncrypted") {
+            Write-Host "Encryption is done"
+            Write-Log -Message "Encryption is done" -Severity Warning
+        }
     }
 
-    if ((Get-BitLockerVolume -MountPoint $env:SystemDrive -ErrorAction SilentlyContinue).VolumeStatus -eq "EncryptionInProgress") {
-        Write-Host "Encryption is done"
-        Write-Log -Message "Encryption is done" -Severity Warning
-    }
-    else {
-        Write-Host "Encryption not working or another error."
-        Write-Log -Message "Encryption not working or another error." -Severity Info
-    }
 }
 
 # Add Bitlocker Protectors
@@ -175,7 +171,7 @@ switch ($BitLockerDecrypted) {
     "DecryptionInProgress" {
         Write-Host "Bitlocker volume decryption is in progress. Stopping at this point"
         Write-Log -Message "Bitlocker volume decryption is in progress. Stopping at this point" -Severity Error
-        try {
+         try {
             while ($true) {
 
                 $drive = "C:"
@@ -198,7 +194,7 @@ switch ($BitLockerDecrypted) {
             Write-Host "Error disabling Bitlocker. Stopping at this point."
             Write-Log -Message "Error disabling Bitlocker. Stopping at this point." -Severity Error
             Exit $Error_BLDecryptionInProgress
-        }
+        } 
     }
     "FullyEncrypted" {
         # check if used space only encryption is enabled
