@@ -155,6 +155,18 @@ function AddBitlockerProtectors {
     # Write-Log -Message "Adding Bitlocker RecoveryPasswordProtector" -Severity Info
 }
 
+$BT_TAG = Test-Path "C:\ProgramData\Bitlocker\Bitlocker-Reencrypt.tag"
+$encryptMethod = Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Policies\Microsoft\FVE' -Name 'OSEncryptionType' | select -ExpandProperty OSEncryptionType
+
+if ($encryptMethod -eq 2) {
+    Write-Host "Encryption method is set to used space only."
+    Write-Log -Message "Encryption method is set to used space only." -Severity Info
+} else {
+    Write-Host "Encryption method is set to full disk encryption."
+    Write-Log -Message "Encryption method is set to full disk encryption." -Severity Info
+}
+
+
 # Check Bitlocker status states
 switch ($BitLockerDecrypted) {
     "FullyDecrypted" {
@@ -197,12 +209,14 @@ switch ($BitLockerDecrypted) {
         } 
     }
     "FullyEncrypted" {
-        # check if used space only encryption is enabled
-        if ($null -ne $UsedSpace) {
+        if (($null -ne $UsedSpace) -and ($BT_TAG -eq $false) -and ($encryptMethod -eq 1)) {
             Write-Host "Drive already encrypted under used space only. Let's remove this encryption and re-encrypt with full disk encryption."
             Disable-BitLocker -MountPoint $env:SystemDrive
             Start-Sleep -Seconds 120
             InitializeTpm
+            #creats a tag file to prevent re-encryption loop.
+            New-Item -Path "C:\ProgramData\Bitlocker" -ItemType Directory -ErrorAction SilentlyContinue
+            New-item -Path "C:\ProgramData\Bitlocker\Bitlocker-Reencrypt.tag" -ItemType File -ErrorAction SilentlyContinue
             # AddBitlockerProtectors
         }
         else {
