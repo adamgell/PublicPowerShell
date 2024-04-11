@@ -21,6 +21,13 @@ foreach ($file in $infFiles) {
             "Driver version $targetDriverVersion found in file: $($file.Name)"
             $OEMFILE = $file.FullName
             break # Stop checking this file and move to the next
+        } else {
+            Write-Output "Driver version $targetDriverVersion $pattern not found!"
+            if($null -eq $OEMFILE){
+                Write-Output "Exiting...."
+                Exit 1
+                
+            }
         }
     }
 }
