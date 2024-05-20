@@ -121,8 +121,7 @@ if ($Result -eq 0) {
 
     Write-Host "OK $([datetime]::Now) : SCCM not found."
     #Exit 0
-}
-else {
+}else {
     Write-Host "WARNING $([datetime]::Now) : $DetectSummary"
     #Exit 1
 }

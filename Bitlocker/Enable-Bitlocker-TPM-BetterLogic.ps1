@@ -145,6 +145,18 @@ function InitializeTpm {
         }
     }
 
+    Start-Sleep -Seconds 120
+    
+    if ((Get-BitLockerVolume -MountPoint $env:SystemDrive -ErrorAction SilentlyContinue).ProtectionStatus -eq "Off") {
+        Write-Host "Protection status is off. Enabling it."
+        Write-Log -Message "Protection status is off. Enabling it." -Severity Warning
+        Resume-BitLocker -MountPoint $env:SystemDrive
+    }
+    else {
+        Write-Host "Protection status is on."
+        Write-Log -Message "Protection status is on." -Severity Info
+    }
+
 }
 
 # Add Bitlocker Protectors
