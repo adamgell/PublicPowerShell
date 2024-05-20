@@ -1,5 +1,6 @@
 # Bitlocker Sample Script
-# Version 0.5
+# Version 1.0
+# added protection status check
 
 #
 # Write-Log function
@@ -146,7 +147,7 @@ function InitializeTpm {
     }
 
     Start-Sleep -Seconds 120
-    
+
     if ((Get-BitLockerVolume -MountPoint $env:SystemDrive -ErrorAction SilentlyContinue).ProtectionStatus -eq "Off") {
         Write-Host "Protection status is off. Enabling it."
         Write-Log -Message "Protection status is off. Enabling it." -Severity Warning
