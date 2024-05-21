@@ -1,5 +1,5 @@
 #Delete existing scheduled task if it exists
-$taskName = "ComputerRestart"
+$taskName = "Computer Restart"
 # Query the system for the task. If it doesn't exist, an error message will be returned
 $taskExists = schtasks /query /TN $($taskName) 2>&1 | Select-String -Pattern "ERROR: The system cannot find the file specified." -Quiet
 
@@ -26,7 +26,7 @@ if (!(Test-Path $resourcePath)) {
 
 # Define the files to be copied
 $packageFiles = @(
-    "ComputerRestart.xml"
+    "Windows-Reboot.xml"
 )
 
 # Copy each file in the list to the destination directory
