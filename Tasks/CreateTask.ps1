@@ -26,7 +26,7 @@ if (!(Test-Path $resourcePath)) {
 
 # Define the files to be copied
 $packageFiles = @(
-    "Windows-Reboot.xml"
+    "Computer Restart.xml"
 )
 
 # Copy each file in the list to the destination directory

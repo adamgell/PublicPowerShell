@@ -1,0 +1,17 @@
+<Configuration>
+    <MappedFolders>
+        <MappedFolder>
+            <HostFolder>E:\Scripts\PublicPowerShell\sandbox\vscode</HostFolder>
+            <SandboxFolder>C:\SandboxScripts</SandboxFolder>
+            <ReadOnly>true</ReadOnly>
+        </MappedFolder>
+        <MappedFolder>
+            <HostFolder>E:\Scripts\PublicPowerShell</HostFolder>
+            <SandboxFolder>C:\CodingProjects</SandboxFolder>
+            <ReadOnly>false</ReadOnly>
+        </MappedFolder>
+    </MappedFolders>
+    <LogonCommand>
+        <Command>C:\SandboxScripts\VSCodeInstall.cmd</Command>
+    </LogonCommand>
+</Configuration>
