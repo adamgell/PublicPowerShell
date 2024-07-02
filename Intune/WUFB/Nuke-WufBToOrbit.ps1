@@ -8,7 +8,7 @@ $registryPaths = @(
     'HKLM:\SOFTWARE\POLICIES\Microsoft\Windows\Update'
 )
 
-# Loop through each registry path
+# Loop through each registry path-
 foreach ($registryPath in $registryPaths) {
     # Check if the registry path exists
     if (Test-Path $registryPath) {
