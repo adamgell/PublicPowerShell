@@ -446,3 +446,5 @@ End
                 Restart-Computer -Force
             }
         }
+    }
+}
