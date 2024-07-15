@@ -1,1 +1,2 @@
-intunewinapputil.exe -c .\RenameComputerPrefixSerial -s RenameComputer.ps1 -o .\ -q
+intunewinapputil.exe -c .\RenameComputerPrefixSerial -s RenameComputerPrefixSerial.ps1 -o .\ -q
+pause
