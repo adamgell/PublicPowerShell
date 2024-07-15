@@ -37,41 +37,44 @@ if ($dcInfo.dnsHostName -eq $null) {
 
 if ($goodToGo) {
     # Get the new computer name
-   # Retrieve system enclosure information
-$systemEnclosure = Get-CimInstance -ClassName Win32_SystemEnclosure
+    # Retrieve system enclosure information
+    $systemEnclosure = Get-CimInstance -ClassName Win32_SystemEnclosure
 
-# Determine the asset tag
-if (($null -eq $systemEnclosure.SMBIOSAssetTag) -or ($systemEnclosure.SMBIOSAssetTag -eq "")) {
-    # Handle PowerShell 5.1 bug
-    if ($null -ne $details.BiosSerialNumber) {
-        $assetTag = $details.BiosSerialNumber
-    } else {
-        $assetTag = $details.BiosSerialNumber
+    # Determine the asset tag
+    if (($null -eq $systemEnclosure.SMBIOSAssetTag) -or ($systemEnclosure.SMBIOSAssetTag -eq "")) {
+        # Handle PowerShell 5.1 bug
+        if ($null -ne $details.BiosSerialNumber) {
+            $assetTag = $details.BiosSerialNumber
+        }
+        else {
+            $assetTag = $details.BiosSerialNumber
+        }
     }
-} else {
-    $assetTag = $systemEnclosure.SMBIOSAssetTag
-}
+    else {
+        $assetTag = $systemEnclosure.SMBIOSAssetTag
+    }
 
-# Get the current computer name and process it
-$currentComputerName = $env:ComputerName
-$tempComputerName = $currentComputerName.Split('-')
-$assetTag = $assetTag.Replace("-", "")
+    # Get the current computer name and process it
+    $currentComputerName = $env:ComputerName
+    $tempComputerName = $currentComputerName.Split('-')
+    $assetTag = $assetTag.Replace("-", "")
 
-# Trim the asset tag if it's longer than 12 characters
-if ($assetTag.Length -gt 12) {
-    $serial = $assetTag.Substring(0, 10)
-} else {
-    $serial = $assetTag
-}
+    # Trim the asset tag if it's longer than 12 characters
+    if ($assetTag.Length -gt 12) {
+        $serial = $assetTag.Substring(0, 10)
+    }
+    else {
+        $serial = $assetTag
+    }
 
-# Construct the new computer name
-$temp = $tempComputerName[0]
-$newName = "$temp-$serial"
+    # Construct the new computer name
+    $temp = $tempComputerName[0]
+    $newName = "$temp-$serial"
 
-# Display and set the new computer name
-Write-Host "Renaming computer to $($newName)"
+    # Display and set the new computer name
+    Write-Host "Renaming computer to $($newName)"
 
-$newName.Length
+    $newName.Length
 
     Rename-Computer -NewName $newName
 
