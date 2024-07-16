@@ -1,0 +1,1 @@
+https://call4cloud.nl/2024/05/kb5036980-breaks-upgrade-windows11-enterprise/
