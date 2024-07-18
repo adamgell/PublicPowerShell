@@ -8,7 +8,7 @@
 Param()
 
 # If we are running as a 32-bit process on an x64 system, re-launch as a 64-bit process
-if ("$env:PROCESSOR_ARCHITEW6432" -ne "ARM64")
+if ("$env:PROCESSOR_ARCHITECTURE" -ne "ARM64")
 {
     if (Test-Path "$($env:WINDIR)\SysNative\WindowsPowerShell\v1.0\powershell.exe")
     {
@@ -49,43 +49,20 @@ if ($goodToGo) {
     # Get the new computer name
     # Retrieve system enclosure information
     $systemEnclosure = Get-CimInstance -ClassName Win32_SystemEnclosure
-
-    # Determine the asset tag
-    if (($null -eq $systemEnclosure.SMBIOSAssetTag) -or ($systemEnclosure.SMBIOSAssetTag -eq "")) {
-        # Handle PowerShell 5.1 bug
-        if ($null -ne $details.BiosSerialNumber) {
-            $assetTag = $details.BiosSerialNumber
-        }
-        else {
-            $assetTag = $details.BiosSerialNumber
-        }
-    }
-    else {
-        $assetTag = $systemEnclosure.SMBIOSAssetTag
-    }
+    $serial = $systemEnclosure.SerialNumber
 
     # Get the current computer name and process it
     $currentComputerName = $env:ComputerName
+    # Split the current computer name to only keep the prefix
     $tempComputerName = $currentComputerName.Split('-')
-    $assetTag = $assetTag.Replace("-", "")
-
-    # Trim the asset tag if it's longer than 12 characters
-    if ($assetTag.Length -gt 12) {
-        $serial = $assetTag.Substring(0, 10)
-    }
-    else {
-        $serial = $assetTag
-    }
-
+   
     # Construct the new computer name
     $temp = $tempComputerName[0]
+    # Construct the new computer name
     $newName = "$temp-$serial"
 
     # Display and set the new computer name
     Write-Host "Renaming computer to $($newName)"
-
-    $newName.Length
-
     Rename-Computer -NewName $newName
 
     # Remove the scheduled task
