@@ -2,7 +2,6 @@
 
 # Define the registry paths
 $registryPaths = @(
-    'HKLM:\SOFTWARE\Microsoft\PolicyManager\current\device\Update',
     'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate',
     'HKLM:\SOFTWARE\POLICIES\Microsoft\Windows\Update\AU',
     'HKLM:\SOFTWARE\POLICIES\Microsoft\Windows\Update'
