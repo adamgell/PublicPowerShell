@@ -4,7 +4,9 @@
 $registryPaths = @(
     'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate',
     'HKLM:\SOFTWARE\POLICIES\Microsoft\Windows\Update\AU',
-    'HKLM:\SOFTWARE\POLICIES\Microsoft\Windows\Update'
+    'HKLM:\SOFTWARE\POLICIES\Microsoft\Windows\Update',
+    "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\GPCache\CacheSet001\WindowsUpdate",
+    "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\GPCache\CacheSet002\WindowsUpdate"
 )
 
 # Loop through each registry path-
