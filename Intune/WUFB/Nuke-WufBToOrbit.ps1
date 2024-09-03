@@ -5,6 +5,7 @@ $registryPaths = @(
     'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate',
     'HKLM:\SOFTWARE\POLICIES\Microsoft\Windows\Update\AU',
     'HKLM:\SOFTWARE\POLICIES\Microsoft\Windows\Update',
+    # https://conditionalaccess.uk/my-windows-autopatch-experience/
     "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\GPCache\CacheSet001\WindowsUpdate",
     "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\GPCache\CacheSet002\WindowsUpdate"
 )
