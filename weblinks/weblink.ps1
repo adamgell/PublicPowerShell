@@ -14,7 +14,7 @@ foreach ($file in $packageFiles) {
 }
 
 $WshShell = New-Object -comObject WScript.Shell
-$Shortcut = $WshShell.CreateShortcut("C:\Users\Public\Desktop\Arkansas State Library.lnk")
+$Shortcut = $WshShell.CreateShortcut("C:\Users\Public\Desktop\weblink.lnk")
 #url
 $Shortcut.TargetPath=""
 $Shortcut.Arguments=""
