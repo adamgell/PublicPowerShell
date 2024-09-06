@@ -85,6 +85,7 @@ if ($goodToGo) {
         $serial = $assetTag
     }
 
+    $user
     # Construct the new computer name
     $temp = $tempComputerName[0]
     $newName = "$temp-$serial"
