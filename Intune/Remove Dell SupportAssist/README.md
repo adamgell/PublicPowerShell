@@ -1,0 +1,1 @@
+$ENV:WINDIR\SysNative\WindowsPowershell\v1.0\PowerShell.exe -ex bypass -file Remediate_DellSupportassist.ps1
