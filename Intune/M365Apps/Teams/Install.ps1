@@ -24,6 +24,9 @@ Copy-Item -Path $msixFile -Destination $destinationPath -Force
 
 # Check if the copy operation was successful
 if ($?) {
+    Get-AppPackage -AllUsers *MSTeams* | Remove-AppPackage -AllUsers -ErrorAction SilentlyContinue
+    # Uninstall teams if perviously installed
+    Start-Process -FilePath $bootstrapperPath -ArgumentList "-x" -Wait -WindowStyle Hidden
     # If successful, execute teamsbootstrapper.exe with specified parameters
     Start-Process -FilePath $bootstrapperPath -ArgumentList "-p", "-o", "$destinationPath\MSTeams-x64.msix" -Wait -WindowStyle Hidden
     Write-Host "Microsoft Teams installation completed successfully."

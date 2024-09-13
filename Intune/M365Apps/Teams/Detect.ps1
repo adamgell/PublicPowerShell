@@ -1,35 +1,47 @@
-<# 
-.SYNOPSIS 
-Detect New Microsoft Teams App on target devices 
-.DESCRIPTION 
-Below script will detect if New MS Teams App is installed.
- 
-.NOTES     
-        Name       : New MS Teams Detection Script
-        Author     : Jatin Makhija  
-        Version    : 1.0.0  
-        DateCreated: 12-Jan-2024
-        Blog       : https://cloudinfra.net
-         
-.LINK 
-https://cloudinfra.net 
-#>
-# Define the path where New Microsoft Teams is installed
+# Initialize variable to track installation detection using file system approach
+$detectWinApps = $false
+
+# Define the path where Microsoft Teams is typically installed via Windows Apps
 $teamsPath = "C:\Program Files\WindowsApps"
 
-# Define the filter pattern for Microsoft Teams installer
+# Define the naming pattern used by Microsoft Teams installers within the Windows Apps folder
 $teamsInstallerName = "MSTeams_*"
 
-# Retrieve items in the specified path matching the filter pattern
+# Retrieve files that match the installer naming pattern in the specified directory
 $teamsNew = Get-ChildItem -Path $teamsPath -Filter $teamsInstallerName
 
-# Check if Microsoft Teams is installed
-if ($teamsNew) {
-    # Display message if Microsoft Teams is found
-    Write-Host "New Microsoft Teams client is installed."
-    exit 0
+# Determine if Teams is installed based on retrieved files
+if ($null -ne $teamsNew) {
+    $detectWinApps = $true
 } else {
-    # Display message if Microsoft Teams is not found
+    $detectWinApps = $false
+}
+
+# Initialize variable to track installation detection using Get-AppPackage
+$detectAppPackage = $false
+
+# Retrieve the AppPackage information for Microsoft Teams installed for any user
+$teamsAppPackage = Get-AppPackage -AllUsers *MSTeams*
+
+# Check if the installation location of the retrieved package exists
+$teamsAppPackage = Test-Path $teamsAppPackage.InstallLocation -ErrorAction SilentlyContinue
+
+# Determine if Teams is installed based on the AppPackage installation path
+if ($null -ne $teamsAppPackage) {
+    $detectAppPackage = $true
+} else {
+    $detectAppPackage = $false
+}
+
+# Output the status of Teams installation detection via both methods
+Write-Output $detectWinApps
+Write-Output $detectAppPackage
+
+# Display the overall installation status based on both detection methods
+if ($detectWinApps -eq $true -and $detectAppPackage -eq $true) {
+    Write-Host "Microsoft Teams client is installed."
+    Exit 0
+} else {
     Write-Host "Microsoft Teams client not found."
-    exit 1
+    Exit 1
 }
