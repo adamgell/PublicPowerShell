@@ -5,20 +5,24 @@ $detectAppPackage = $false
 $teamsAppPackage = Get-AppPackage -AllUsers *MSTeams*
 
 # Check if the installation location of the retrieved package exists
-$teamsAppPackage = Test-Path $teamsAppPackage.InstallLocation -ErrorAction SilentlyContinue
+$installLocationExists = Test-Path $teamsAppPackage.InstallLocation -ErrorAction SilentlyContinue
 
 # Determine if Teams is installed based on the AppPackage installation path
-if ($null -ne $teamsAppPackage) {
+if ($installLocationExists) {
     $detectAppPackage = $true
 }
 else {
     $detectAppPackage = $false
 }
 
-# check if Teams is installed in start menu
+# Check if Teams is installed in start menu
 $detectAppStartMenu = $false
-$teamsStartMenu = Test-path "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Microsoft Teams.lnk" -ErrorAction SilentlyContinue
-if ($null -ne $teamsStartMenu) {
+
+
+$teamsStartMenu = Test-Path "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Microsoft Teams.lnk" -ErrorAction SilentlyContinue
+
+# Determine if the Start Menu shortcut exists
+if ($teamsStartMenu) {
     $detectAppStartMenu = $true
 }
 else {
