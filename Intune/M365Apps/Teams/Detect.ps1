@@ -8,15 +8,14 @@ else {
     $detectAppStartMenu = $false
 }
 
-
 Write-Output $detectAppStartMenu
 
 # Display the overall installation status based on both detection methods
 if ($detectAppStartMenu -eq $true) {
     Write-Host "Microsoft Teams client is installed."
-    #Exit 0 
+    Exit 0 
 }
 else {
     Write-Host "Microsoft Teams client not found."
-    #Exit 1
+    Exit 1
 } 
