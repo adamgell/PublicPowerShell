@@ -29,11 +29,21 @@ else {
     $detectAppStartMenu = $false
 }
 
+#check for ICO file in ProgramData  "C:\ProgramData\Microsoft\teams.ico"
+$teamsIcon = Test-Path "C:\ProgramData\Microsoft\teams.ico" -ErrorAction SilentlyContinue
+if ($teamsIcon) {
+    $teamsIcon = $true
+}
+else {
+    $teamsIcon = $false
+}
+
 Write-Output $detectAppPackage
 Write-Output $detectAppStartMenu
+Write-Output $teamsIcon
 
 # Display the overall installation status based on both detection methods
-if ($detectAppStartMenu -eq $true -and $detectAppPackage -eq $true) {
+if ($detectAppStartMenu -eq $true -and $detectAppPackage -eq $true -and $teamsIcon -eq $true) {
     Write-Host "Microsoft Teams client is installed."
     Exit 0 
 }
