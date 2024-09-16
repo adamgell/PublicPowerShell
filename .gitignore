@@ -2,3 +2,5 @@
 Teams/Teams_windows_x64.msi
 Intune/M365Apps/Teams/MSTeams-x64.msix
 Intune/M365Apps/Teams/Install.intunewin
+Intune/GlobalProtect_ShowUI/Files/GlobalProtect64-6.2.3.msi
+Intune/GlobalProtect_ShowUI/Files/GlobalProtect64-6.2.4.msi

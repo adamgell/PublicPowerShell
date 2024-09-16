@@ -208,12 +208,10 @@ Try {
         $guid = $data | Where-Object { $_.DisplayName -like "*$DisplayName*" } | Select-Object DisplayName, DisplayVersion, InstallDate, @{Name = 'GUID'; Expression = { if ($_.UninstallString -match $reGuid) { $matches[1] } } }, UninstallString | Sort-Object DisplayName | Get-Unique -AsString | Select-Object -ExpandProperty GUID
 
         # Uninstall the program
-        $guid
+        #$guid
         Start-Process msiexec.exe -ArgumentList "/x {$guid} /qn /l*v uninstall.log" -NoNewWindow -Wait
-
-        #Start-Process -FilePath msiexec -ArgumentList "/x `"{A9BC813E-9D56-4C24-AF8A-2E455C11E797}`" /qn" -Wait
-
-        Start-Process -FilePath msiexec -ArgumentList "/i `"GlobalProtect64-6.2.4.msi`" PORTAL=vpn.hchb.com CONNECTMETHOD=`”user-logon`” /qn"
+        Execute-MSI -Action 'Install' -Path 'GlobalProtect64-6.2.4.msi' -Parameters 'REBOOT=ReallySuppress /QN' -AddParameters "PORTAL=vpn.hchb.com CONNECTMETHOD='user-logon'"
+        #Start-Process -FilePath msiexec -ArgumentList "/i `"GlobalProtect64-6.2.4.msi`" PORTAL=vpn.hchb.com CONNECTMETHOD=`"user-logon`" /qn" -Wait
 
 
         ## <Perform Installation tasks here>
