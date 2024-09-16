@@ -13,7 +13,8 @@ $teamsNew = Get-ChildItem -Path $teamsPath -Filter $teamsInstallerName
 # Determine if Teams is installed based on retrieved files
 if ($null -ne $teamsNew) {
     $detectWinApps = $true
-} else {
+}
+else {
     $detectWinApps = $false
 }
 
@@ -29,19 +30,34 @@ $teamsAppPackage = Test-Path $teamsAppPackage.InstallLocation -ErrorAction Silen
 # Determine if Teams is installed based on the AppPackage installation path
 if ($null -ne $teamsAppPackage) {
     $detectAppPackage = $true
-} else {
+}
+else {
     $detectAppPackage = $false
 }
+
+# check if Teams is installed in start menu
+$detectAppStartMenu = $false
+$teamsStartMenu = Test-path "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Microsoft Teams.lnk" -ErrorAction SilentlyContinue
+if ($null -ne $teamsStartMenu) {
+    $detectAppStartMenu = $true
+}
+else {
+    $detectAppStartMenu = $false
+}
+
+
 
 # Output the status of Teams installation detection via both methods
 Write-Output $detectWinApps
 Write-Output $detectAppPackage
+Write-Output $detectAppStartMenu
 
 # Display the overall installation status based on both detection methods
-if ($detectWinApps -eq $true -and $detectAppPackage -eq $true) {
+if ($detectAppStartMenu -eq $true) {
     Write-Host "Microsoft Teams client is installed."
-    Exit 0
-} else {
+    Exit 0 
+}
+else {
     Write-Host "Microsoft Teams client not found."
     Exit 1
 }
