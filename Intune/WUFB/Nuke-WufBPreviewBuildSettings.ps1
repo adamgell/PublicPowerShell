@@ -3,7 +3,10 @@ $registryPaths = @(
     'HKLM:\SOFTWARE\Microsoft\PolicyManager\current\device\Update',
     'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate',
     'HKLM:\SOFTWARE\POLICIES\Microsoft\Windows\Update\AU',
-    'HKLM:\SOFTWARE\POLICIES\Microsoft\Windows\Update'
+    'HKLM:\SOFTWARE\POLICIES\Microsoft\Windows\Update',
+    # https://conditionalaccess.uk/my-windows-autopatch-experience/
+    "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\GPCache\CacheSet001\WindowsUpdate",
+    "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\GPCache\CacheSet002\WindowsUpdate"
 )
 
 # Define the registry entries to remove
