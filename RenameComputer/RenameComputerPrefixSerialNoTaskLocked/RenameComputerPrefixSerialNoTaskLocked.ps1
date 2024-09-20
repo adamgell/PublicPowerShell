@@ -31,21 +31,13 @@ if ("$env:PROCESSOR_ARCHITEW6432" -ne "ARM64") {
     }
 }
 
-# Get computer info with error handling
-try {
-    $details = Get-ComputerInfo
-    Write-Log "Successfully retrieved computer information"
-}
-catch {
-    Write-Log "Error retrieving computer information: $_"
-    Stop-Transcript
-    Exit 1
-}
 
 # Check if script is running inside the Enrollment Status Page / Autopilot provisioning
 if ($details.CsUserName -match "defaultUser") {
+    
     Write-Log "Script is running in the Enrollment Status Page / Autopilot provisioning"
     
+
     # Check if the computer is domain-joined.
     $goodToGo = $true
     if (-not $details.CsPartOfDomain) {
@@ -61,6 +53,8 @@ if ($details.CsUserName -match "defaultUser") {
         if ($null -eq $dcInfo.dnsHostName) {
             Write-Log "Unable to establish connectivity to the domain. Please check network settings."
             $goodToGo = $false
+            Stop-Transcript
+            Exit 1
         }
     }
     catch {
@@ -73,9 +67,27 @@ if ($details.CsUserName -match "defaultUser") {
     # Main renaming logic
     if ($goodToGo) {
         try {
-            $systemEnclosure = Get-CimInstance -ClassName Win32_SystemEnclosure
-            Write-Log "Retrieved system enclosure information"
-
+            # Get computer info with error handling
+            try {
+                $details = Get-ComputerInfo
+                Write-Log "Successfully retrieved computer information"
+            }
+            catch {
+                Write-Log "Error retrieving computer information: $_"
+                Stop-Transcript
+                Exit 1
+            }
+            # Get Win32_SystemEnclosure with error handling
+            try {
+                $systemEnclosure = Get-CimInstance -ClassName Win32_SystemEnclosure
+                Write-Log "Successfully retrieved Win32_SystemEnclosure information"
+            }
+            catch {
+                Write-Log "Error retrieving computer information: $_"
+                Stop-Transcript
+                Exit 1
+            }
+            
             # Determine the asset tag or use BIOS serial number as a fallback
             if (($null -eq $systemEnclosure.SMBIOSAssetTag) -or ($systemEnclosure.SMBIOSAssetTag -eq "")) {
                 $assetTag = $details.BiosSerialNumber ?? "UnknownSerial"
@@ -86,21 +98,38 @@ if ($details.CsUserName -match "defaultUser") {
                 Write-Log "Using SMBIOSAssetTag as asset tag: $assetTag"
             }
 
-            $currentComputerName = $env:ComputerName
-            $tempComputerName = $currentComputerName.Split('-')
-            $assetTag = $assetTag.Replace("-", "")
+            # Uncomment this line to set a predefined asset tag if needed for testing purposes
+            # $assetTag = "PF4J0KCG"
 
-            # Ensure the asset tag portion of the new name doesn't exceed 12 characters
-            if ($assetTag.Length -gt 12) {
-                $serial = $assetTag.Substring(0, 10)
+            $currentComputerName = $env:ComputerName
+            # Uncomment this line to set a predefined computername if needed for testing purposes
+            # $currentComputerName = "BFSSC-34128097234890423"
+
+            Write-Log "Current Computer Name: $currentComputerName"
+
+            $tempComputerName = $currentComputerName.Split('-')
+            $prefix = $tempComputerName[0]
+            Write-Log "Prefix: $prefix"
+
+            $assetTag = $assetTag.Replace("-", "").Replace(" ", "")
+            Write-Log "Cleaned Asset Tag: $assetTag"
+
+            # Determine the system type and construct the new name
+            if ($details.CsPCSystemTypeEx -eq "Desktop") {
+                $newName = "$prefix" + "D" + "$assetTag"
+                Write-Log "Desktop system detected. Using naming format: PREFIX + D + ASSET TAG"
             }
             else {
-                $serial = $assetTag
+                $newName = "$prefix" + "$assetTag"
+                Write-Log "Non-desktop system detected. Using naming format: PREFIX + ASSET TAG"
             }
 
-            # Construct the new computer name
-            $temp = $tempComputerName[0]
-            $newName = "$temp-$serial"
+            # Ensure the new name doesn't exceed 15 characters
+            if ($newName.Length -gt 15) {
+                $newName = $newName.Substring(0, 15)
+                Write-Log "New name exceeded 15 characters. Truncated to: $newName"
+            }
+
             Write-Log "Constructed new computer name: $newName"
 
             # Perform the actual rename operation
@@ -135,4 +164,4 @@ else {
     Write-Log "Unable to proceed with computer rename due to unmet prerequisites. Please check domain join status and network connectivity."
     Stop-Transcript
     Exit 1
-}
+}6

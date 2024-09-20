@@ -1,2 +1,2 @@
-intunewinapputil.exe -c .\RenameComputerPrefixSerial -s RenameComputerPrefixSerial.ps1 -o .\ -q
+intunewinapputil.exe -c .\RenameComputerPrefixSerialNoTaskLocked -s RenameComputerPrefixSerialNoTaskLocked.ps1 -o .\ -q
 pause
