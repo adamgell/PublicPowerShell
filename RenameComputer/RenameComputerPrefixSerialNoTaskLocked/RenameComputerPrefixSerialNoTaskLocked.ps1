@@ -88,7 +88,7 @@ if ($details.CsUserName -match "defaultUser") {
             
             # Determine the asset tag or use BIOS serial number as a fallback
             if (($null -eq $systemEnclosure.SMBIOSAssetTag) -or ($systemEnclosure.SMBIOSAssetTag -eq "")) {
-                $assetTag = $details.BiosSerialNumber ?? "UnknownSerial"
+                $assetTag = $details.BiosSerialNumber
                 Write-Log "Using BIOS Serial Number as asset tag: $assetTag"
             }
             else {
