@@ -31,13 +31,21 @@ if ("$env:PROCESSOR_ARCHITEW6432" -ne "ARM64") {
     }
 }
 
+# Get computer info with error handling
+try {
+    $details = Get-ComputerInfo
+    Write-Log "Successfully retrieved computer information"
+}
+catch {
+    Write-Log "Error retrieving computer information: $_"
+    Stop-Transcript
+    Exit 1
+}
 
 # Check if script is running inside the Enrollment Status Page / Autopilot provisioning
 if ($details.CsUserName -match "defaultUser") {
-    
     Write-Log "Script is running in the Enrollment Status Page / Autopilot provisioning"
     
-
     # Check if the computer is domain-joined.
     $goodToGo = $true
     if (-not $details.CsPartOfDomain) {
@@ -67,23 +75,13 @@ if ($details.CsUserName -match "defaultUser") {
     # Main renaming logic
     if ($goodToGo) {
         try {
-            # Get computer info with error handling
-            try {
-                $details = Get-ComputerInfo
-                Write-Log "Successfully retrieved computer information"
-            }
-            catch {
-                Write-Log "Error retrieving computer information: $_"
-                Stop-Transcript
-                Exit 1
-            }
             # Get Win32_SystemEnclosure with error handling
             try {
                 $systemEnclosure = Get-CimInstance -ClassName Win32_SystemEnclosure
                 Write-Log "Successfully retrieved Win32_SystemEnclosure information"
             }
             catch {
-                Write-Log "Error retrieving computer information: $_"
+                Write-Log "Error retrieving Win32_SystemEnclosure information: $_"
                 Stop-Transcript
                 Exit 1
             }
@@ -164,4 +162,4 @@ else {
     Write-Log "Unable to proceed with computer rename due to unmet prerequisites. Please check domain join status and network connectivity."
     Stop-Transcript
     Exit 1
-}6
+}
