@@ -1,18 +1,24 @@
-<Configuration ID="1cf14186-7ede-482e-9aac-20bb3280cd24">
-  <Add OfficeClientEdition="64" Channel="Current" MigrateArch="TRUE">
+<Configuration ID="f635c55d-dedc-418f-8815-7f0eb8f4267d">
+  <Add OfficeClientEdition="64" Channel="Current">
     <Product ID="O365ProPlusRetail">
+      <Language ID="MatchOS" />
       <Language ID="en-us" />
-      <Language ID="MatchPreviousMSI" />
+      <ExcludeApp ID="Excel" />
       <ExcludeApp ID="Groove" />
+      <ExcludeApp ID="OneDrive" />
+      <ExcludeApp ID="OneNote" />
+      <ExcludeApp ID="Outlook" />
+      <ExcludeApp ID="PowerPoint" />
       <ExcludeApp ID="Lync" />
-      <ExcludeApp ID="Publisher" />
+      <ExcludeApp ID="Teams" />
+      <ExcludeApp ID="Word" />
+      <ExcludeApp ID="Bing" />
     </Product>
   </Add>
   <Property Name="SharedComputerLicensing" Value="0" />
   <Property Name="FORCEAPPSHUTDOWN" Value="TRUE" />
   <Property Name="DeviceBasedLicensing" Value="0" />
   <Property Name="SCLCacheOverride" Value="0" />
-  <Property Name="TenantId" Value="8db2d067-abd7-4b13-b2a5-3924ed273b1a" />
   <Updates Enabled="TRUE" />
   <RemoveMSI />
   <AppSettings>
