@@ -57,7 +57,7 @@ $dtpEndDate = New-Object System.Windows.Forms.DateTimePicker
 $dtpEndDate.Location = New-Object System.Drawing.Point(170,110)
 $dtpEndDate.Size = New-Object System.Drawing.Size(200,20)
 $dtpEndDate.Format = [System.Windows.Forms.DateTimePickerFormat]::Short
-$dtpEndDate.Value = (Get-Date)  # Set to today's date
+$dtpEndDate.Value = (Get-Date -Day 1).AddMonths(1).AddDays(-1)  # Set to the last day of the current month
 $form.Controls.Add($dtpEndDate)
 
 # Create calculate button
