@@ -64,7 +64,7 @@
 - Due to the addition of the new lock screen image setting step, all subsequent steps have been renumbered.
 - The script now has 16 main steps instead of the original 15.
 
---
+---
 
 # Autopilot Branding
 
@@ -121,7 +121,7 @@ See https://oofhours.com/2020/05/18/two-for-one-updated-autopilot-branding-and-u
 
 If you have suggestions on other customizations that would be useful, contact me at michael@oofhours.com.
 
---
+---
 
 ## Timezone
 
