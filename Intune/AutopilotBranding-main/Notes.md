@@ -1,3 +1,72 @@
+# Summary of Changes to AutopilotBranding Script
+
+## General Improvements
+1. Enhanced logging throughout the script for better troubleshooting.
+2. Added region tags to improve script structure and readability.
+3. Improved error handling and reporting in various sections.
+
+## Specific Changes
+
+### Logging
+- Added more detailed logging for each major step and substep.
+- Included logging for potential errors, especially in areas where exceptions might occur.
+- Added logging for the start and end of the script execution.
+- Included more context in log messages, such as file paths and configuration values.
+
+### Script Structure
+- Organized the script into logical regions for better organization and maintainability.
+- Each major step is now clearly delineated with a region tag.
+
+### New Functionality
+1. **Lock Screen Image Setting (New Step 3)**
+   - Added functionality to set Autopilot.jpg as the lock screen image.
+   - Uses PersonalizationCSP for setting the lock screen image.
+   - Includes error handling and logging for this process.
+   - Also sets additional registry keys for enforcing the lock screen policy.
+
+### Existing Steps Modifications
+1. **32-bit to 64-bit Process Check**
+   - Added logging for the process relaunch.
+
+2. **Create Output Folder**
+   - Improved logging for the creation of the AutopilotBranding directory.
+
+3. **Apply Custom Start Menu Layout (Step 1)**
+   - Added logging for OS Build Number.
+   - Improved logging for the layout import process.
+
+4. **Configure Background (Step 2)**
+   - Added more detailed logging for each sub-step.
+
+5. **Time Zone Setting (Now Step 4)**
+   - Improved logging for both manual time zone setting and enabling location services.
+
+6. **Remove Provisioned Apps (Step 5)**
+   - Enhanced error handling and logging for app removal process.
+
+7. **OneDrive Installation (Step 6)**
+   - Added logging for download and installation process.
+
+8. **Language Packs (Step 8)**
+   - Improved logging for language pack addition.
+
+9. **Add Features on Demand (Step 10)**
+   - Added logging for WSUS temporary disabling and re-enabling.
+   - Improved logging for feature addition process.
+
+10. **OEM Branding Info (Step 13)**
+    - Added logging for OEM logo copying process.
+
+11. **UE-V Configuration (Step 14)**
+    - Improved logging for UE-V template registration.
+
+### Renumbering of Steps
+- Due to the addition of the new lock screen image setting step, all subsequent steps have been renumbered.
+- The script now has 16 main steps instead of the original 15.
+
+## Conclusion
+These changes have significantly improved the script's logging capabilities, error handling, and overall structure. The addition of the lock screen image setting feature enhances the branding capabilities of the script. The reorganization and renumbering of steps make the script more logical and easier to maintain.
+
 ## Timezone
 
 `Get-TimeZone -ListAvailable | Select ID | Sort-Object -Property ID`
