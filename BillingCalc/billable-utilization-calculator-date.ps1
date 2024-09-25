@@ -7,6 +7,7 @@ $form = New-Object System.Windows.Forms.Form
 $form.Text = "Billable Utilization Calculator"
 $form.Size = New-Object System.Drawing.Size(400,450)
 $form.StartPosition = "CenterScreen"
+$form.TopMost = $true
 
 # Create labels
 $lblCurrentHours = New-Object System.Windows.Forms.Label

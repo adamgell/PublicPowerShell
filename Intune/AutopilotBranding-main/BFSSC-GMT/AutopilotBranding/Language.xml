@@ -1,0 +1,21 @@
+<gs:GlobalizationServices xmlns:gs="urn:longhornGlobalizationUnattend">
+    <!--User List-->
+    <gs:UserList>
+        <gs:User UserID="Current" CopySettingsToSystemAcct="true" CopySettingsToDefaultUserAcct="true" /> 
+    </gs:UserList>
+
+    <!--Display Language--> 
+    <gs:MUILanguagePreferences> 
+        <!-- Powershell 
+        get-culture -ListAvailable | Sort-Object DisplayName
+        -->
+        <gs:MUILanguage Value="en-GB" /> 
+        <gs:MUIFallback Value="en-GB" /> 
+    </gs:MUILanguagePreferences> 
+
+    <!--User Locale-->
+    <gs:UserLocale> 
+        <gs:Locale Name="en-GB" SetAsCurrent="true" ResetAllSettings="false"/>
+    </gs:UserLocale>
+
+</gs:GlobalizationServices>  
