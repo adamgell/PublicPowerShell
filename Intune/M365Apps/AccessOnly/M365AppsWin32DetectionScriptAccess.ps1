@@ -1,5 +1,5 @@
 # Define the required Office applications
-$RequiredOfficeApps = @("WINWORD.EXE", "EXCEL.EXE", "POWERPNT.EXE", "OUTLOOK.EXE")
+$RequiredOfficeApps = @("WINWORD.EXE", "EXCEL.EXE", "POWERPNT.EXE", "OUTLOOK.EXE", "MSACCESS.EXE")
 
 function Write-LogEntry {
     param (
@@ -70,7 +70,7 @@ if ($M365AppsCheck -and ($DetectedApps.Count -eq $RequiredOfficeApps.Count)) {
     Write-LogEntry -Value "All required Microsoft 365 Apps detected" -Severity 1
     $detectedAppsList = $DetectedApps -join ", "
     Write-LogEntry -Value "Detected Office applications: $detectedAppsList" -Severity 1
-    Write-Output "All required Microsoft 365 Apps Detected. Found applications: $detectedAppsList"
+    Write-Host "All required Microsoft 365 Apps Detected. Found applications: $detectedAppsList" -foregroundcolor Green
     Exit 0
 } else {
     if (-not $M365AppsCheck) {
