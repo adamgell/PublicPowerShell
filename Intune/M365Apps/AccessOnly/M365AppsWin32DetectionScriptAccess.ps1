@@ -1,3 +1,19 @@
+# Ensure running in 64-bit
+if (-not [Environment]::Is64BitProcess) {
+    if ([Environment]::Is64BitOperatingSystem) {
+        # Relaunch as 64-bit process
+        $arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$($MyInvocation.MyCommand.Path)`""
+        if ($RequireAccess) {
+            $arguments += " -RequireAccess"
+        }
+        Start-Process -FilePath "$env:SystemRoot\sysnative\WindowsPowerShell\v1.0\powershell.exe" -ArgumentList $arguments -Wait -NoNewWindow
+        exit
+    } else {
+        Write-Warning "This script must be run on a 64-bit system."
+        exit 1
+    }
+}
+
 # Define the required Office applications
 $RequiredOfficeApps = @("WINWORD.EXE", "EXCEL.EXE", "POWERPNT.EXE", "OUTLOOK.EXE", "MSACCESS.EXE")
 
@@ -15,7 +31,7 @@ function Write-LogEntry {
         [string]$FileName = $LogFileName
     )
     # Determine log file location
-    $LogFilePath = Join-Path -Path $env:SystemRoot -ChildPath $("Temp\$FileName")
+    $LogFilePath = Join-Path -Path "C:\ProgramData\Microsoft\IntuneManagementExtension" -ChildPath $FileName
     
     # Construct time stamp for log entry
     $Time = -join @((Get-Date -Format "HH:mm:ss.fff"), " ", (Get-WmiObject -Class Win32_TimeZone | Select-Object -ExpandProperty Bias))
@@ -42,7 +58,7 @@ function Write-LogEntry {
     }
 }
 
-$LogFileName = "M365AppsSetup.log"
+$LogFileName = "M365AppsDetection.log"
 Write-LogEntry -Value "Start Office Install detection logic" -Severity 1
 
 # Check for M365 Apps in registry
@@ -50,19 +66,29 @@ $RegistryKeys = Get-ChildItem -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVer
 $M365Apps = "Microsoft 365 Apps"
 $M365AppsCheck = $RegistryKeys | Get-ItemProperty | Where-Object { $_.DisplayName -match $M365Apps }
 
-# Check for specific Office applications
-$OfficePath = "C:\Program Files\Microsoft Office\root\Office16"
+# Define possible Office paths
+$OfficePaths = @(
+    "C:\Program Files\Microsoft Office\root\Office16",
+    "C:\Program Files (x86)\Microsoft Office\root\Office16"
+)
+
 $DetectedApps = @()
 $MissingApps = @()
 
 foreach ($app in $RequiredOfficeApps) {
-    $appPath = Join-Path -Path $OfficePath -ChildPath $app
-    if (Test-Path $appPath) {
-        $DetectedApps += $app
-        Write-LogEntry -Value "$app detected at $appPath" -Severity 1
-    } else {
+    $appFound = $false
+    foreach ($path in $OfficePaths) {
+        $appPath = Join-Path -Path $path -ChildPath $app
+        if (Test-Path $appPath) {
+            $DetectedApps += $app
+            Write-LogEntry -Value "$app detected at $appPath" -Severity 1
+            $appFound = $true
+            break
+        }
+    }
+    if (-not $appFound) {
         $MissingApps += $app
-        Write-LogEntry -Value "$app not found at $appPath" -Severity 2
+        Write-LogEntry -Value "$app not found in any of the searched paths" -Severity 2
     }
 }
 

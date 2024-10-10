@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billable Utilization Calculator</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
+    <link rel="icon" href="icon-192x192.png" type="image/png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, button {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+    <h1>Billable Utilization Calculator</h1>
+    <div class="form-group">
+        <label for="currentHours">Current Billable Hours:</label>
+        <input type="number" id="currentHours" required>
+    </div>
+    <div class="form-group">
+        <label for="targetUtilization">Target Utilization (%):</label>
+        <input type="number" id="targetUtilization" value="82" required>
+    </div>
+    <div class="form-group">
+        <label for="startDate">Start Date:</label>
+        <input type="date" id="startDate" required>
+    </div>
+    <div class="form-group">
+        <label for="endDate">End Date:</label>
+        <input type="date" id="endDate" required>
+    </div>
+    <button onclick="calculate()">Calculate</button>
+    <div id="result"></div>
+
+    <script>
+        // Set default dates
+        window.onload = function() {
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            
+            document.getElementById('startDate').valueAsDate = firstDay;
+            document.getElementById('endDate').valueAsDate = lastDay;
+        };
+
+        function calculate() {
+            const currentHours = parseFloat(document.getElementById('currentHours').value);
+            const targetUtilization = parseFloat(document.getElementById('targetUtilization').value) / 100;
+            const startDate = new Date(document.getElementById('startDate').value);
+            const endDate = new Date(document.getElementById('endDate').value);
+            const currentDate = new Date();
+
+            let workingDays = 0;
+            let remainingWorkingDays = 0;
+
+            for (let day = new Date(startDate); day <= endDate; day.setDate(day.getDate() + 1)) {
+                if (day.getDay() !== 0 && day.getDay() !== 6) {
+                    workingDays++;
+                    if (day >= currentDate) {
+                        remainingWorkingDays++;
+                    }
+                }
+            }
+
+            const totalHours = workingDays * 8;
+            const targetHours = totalHours * targetUtilization;
+            const remainingHours = targetHours - currentHours;
+
+            const currentUtilization = (currentHours / totalHours) * 100;
+
+            const dailyHoursNeeded = remainingWorkingDays > 0 ? remainingHours / remainingWorkingDays : 0;
+
+            const result = `Date Range: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}
+Working Days: ${workingDays}
+Remaining Working Days: ${remainingWorkingDays}
+Total Working Hours: ${totalHours}
+Current Utilization: ${currentUtilization.toFixed(2)}%
+Target Hours: ${targetHours.toFixed(2)}
+Remaining Hours: ${remainingHours.toFixed(2)}
+Daily Hours Needed: ${dailyHoursNeeded.toFixed(2)}`;
+
+            document.getElementById('result').textContent = result;
+        }
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then((registration) => {
+                        console.log('Service Worker registered successfully:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

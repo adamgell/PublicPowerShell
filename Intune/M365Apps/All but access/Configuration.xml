@@ -1,4 +1,4 @@
-<Configuration ID="1d22c90a-e915-458d-8d26-2933de78079f">
+<Configuration ID="4079c022-dac3-4430-87c0-ff67c0227b2e">
   <Add OfficeClientEdition="64" Channel="Current">
     <Product ID="O365ProPlusRetail">
       <Language ID="MatchOS" />
@@ -6,9 +6,12 @@
       <ExcludeApp ID="Groove" />
       <ExcludeApp ID="Lync" />
       <ExcludeApp ID="OneDrive" />
-      <ExcludeApp ID="OneNote" />
+      <ExcludeApp ID="Publisher" />
       <ExcludeApp ID="Teams" />
+      <ExcludeApp ID="Bing" />
     </Product>
   </Add>
   <Updates Enabled="TRUE" />
+  <RemoveMSI />
+  <Display Level="None" AcceptEULA="FALSE" />
 </Configuration>
