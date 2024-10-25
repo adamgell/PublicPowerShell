@@ -1,0 +1,48 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20241025094325
+Username: HOME\adam_admin
+RunAs User: HOME\adam_admin
+Configuration Name: 
+Machine: LUCKY (Microsoft Windows NT 10.0.26100.0)
+Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
+Process ID: 43068
+PSVersion: 5.1.26100.1882
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.1882
+BuildVersion: 10.0.26100.1882
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Transcript started, output file is E:\Repo\PublicPowerShell\Intune\Autopilot\ObjectID\script_log.txt
+Script Directory: E:\Repo\PublicPowerShell\Intune\Autopilot\ObjectID
+Input CSV Path: E:\Repo\PublicPowerShell\Intune\Autopilot\ObjectID\serials.csv
+Output CSV Path: E:\Repo\PublicPowerShell\Intune\Autopilot\ObjectID\ObjectIDList.csv
+Log File Path: E:\Repo\PublicPowerShell\Intune\Autopilot\ObjectID\script_log.txt
+Existing ObjectIDList.csv deleted.
+
+Processing device 1 of 2
+Searching for device with Serial Number: 0F027W622363F6
+Autopilot Device ID: 33bd3786-53ff-4ae5-83f5-028a79de1937
+Found Entra Device Object ID: f47b2dfd-1362-41d5-a340-2abdab28f268
+
+Processing device 2 of 2
+Searching for device with Serial Number: 0B33FX3213833F
+Autopilot Device ID: 120e1615-1ddf-41cc-8bd4-9a1560825b55
+Found Entra Device Object ID: 4c29bce6-61d3-44bd-b6cb-5f2651e67cd3
+
+=== Processing Summary ===
+Total devices processed: 2
+Successfully processed: 2
+Failed to process: 0
+Success rate: 100%
+
+Script completed. Please check:
+- Output file: E:\Repo\PublicPowerShell\Intune\Autopilot\ObjectID\ObjectIDList.csv
+- Log file: E:\Repo\PublicPowerShell\Intune\Autopilot\ObjectID\script_log.txt
+**********************
+Windows PowerShell transcript end
+End time: 20241025094328
+**********************
