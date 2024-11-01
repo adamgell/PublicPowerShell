@@ -28,15 +28,7 @@ $dest = "$($env:ProgramData)\Microsoft\RenameComputer"
 if (-not (Test-Path $dest)) {
     mkdir $dest
 }
-Start-Transcript "$dest\RenameC# If we are running as a 32-bit process on an x64 system, re-launch as a 64-bit process
-if ("$env:PROCESSOR_ARCHITEW6432" -ne "ARM64")
-{
-    if (Test-Path "$($env:WINDIR)\SysNative\WindowsPowerShell\v1.0\powershell.exe")
-    {
-        & "$($env:WINDIR)\SysNative\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy bypass -File "$PSCommandPath" -Prefix $Prefix
-        Exit $lastexitcode
-    }
-}omputer.log" -Append
+Start-Transcript "$dest\RenameComputer.log" -Append
 
 # Make sure we are already domain-joined
 $goodToGo = $true
