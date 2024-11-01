@@ -1,48 +1,74 @@
 <# 
-
 .DESCRIPTION 
- Rename the computer 
-
+This script is designed to rename a computer based on its asset tag or BIOS serial number.
+It checks for domain join status, connectivity, and whether it's running in the Enrollment Status Page / Autopilot provisioning before proceeding with the rename operation.
 #> 
 
 Param()
 
-# If we are running as a 32-bit process on an x64 system, re-launch as a 64-bit process
-if ("$env:PROCESSOR_ARCHITECTURE" -ne "AMD64")
-{
-    if (Test-Path "$($env:WINDIR)\SysNative\WindowsPowerShell\v1.0\powershell.exe")
-    {
-        & "$($env:WINDIR)\SysNative\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy bypass -File "$PSCommandPath" -Prefix $Prefix
-        Exit $lastexitcode
-    }
-}
-
-# Create a tag file just so Intune knows this was installed
-if (-not (Test-Path "$($env:ProgramData)\Microsoft\RenameComputer")) {
-    Mkdir "$($env:ProgramData)\Microsoft\RenameComputer"
-}
-Set-Content -Path "$($env:ProgramData)\Microsoft\RenameComputer\RenameComputer.ps1.tag" -Value "Installed"
-
-# Initialization
+# Set up logging to keep track of script execution and any potential issues.
 $dest = "$($env:ProgramData)\Microsoft\RenameComputer"
 if (-not (Test-Path $dest)) {
     mkdir $dest
 }
 Start-Transcript "$dest\RenameComputer.log" -Append
 
-# Make sure we are already domain-joined
-$goodToGo = $true
-$details = Get-ComputerInfo
-if (-not $details.CsPartOfDomain) {
-    Write-Host "Not part of a domain."
-    $goodToGo = $false
+# Function for consistent logging
+function Write-Log {
+    param([string]$Message)
+    $logMessage = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') - $Message"
+    Write-Host $logMessage
 }
 
-# Make sure we have connectivity
-$dcInfo = [ADSI]"LDAP://RootDSE"
-if ($null -eq $dcInfo.dnsHostName) {
-    Write-Host "No connectivity to the domain."
+Write-Log "Script execution started"
+
+# This section ensures the script runs in 64-bit mode on 64-bit systems.
+if ("$env:PROCESSOR_ARCHITECTURE" -ne "AMD64") {
+    if (Test-Path "$($env:WINDIR)\SysNative\WindowsPowerShell\v1.0\powershell.exe") {
+        Write-Log "Relaunching script in 64-bit PowerShell"
+        & "$($env:WINDIR)\SysNative\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy bypass -File "$PSCommandPath" -Prefix $Prefix
+        Exit $lastexitcode
+    }
+}
+
+# Get computer info with error handling
+try {
+    $details = Get-ComputerInfo
+    Write-Log "Successfully retrieved computer information"
+}
+catch {
+    Write-Log "Error retrieving computer information: $_"
+    Stop-Transcript
+    Exit 1
+}
+
+
+Write-Log "Script is running in the Enrollment Status Page / Autopilot provisioning"
+    
+# Check if the computer is domain-joined.
+$goodToGo = $true
+if (-not $details.CsPartOfDomain) {
+    Write-Log "This computer is not part of a domain. Renaming cannot proceed."
     $goodToGo = $false
+    Stop-Transcript
+    Exit 1
+}
+
+# Verify connectivity to the domain.
+try {
+    $dcInfo = [ADSI]"LDAP://RootDSE"
+    if ($null -eq $dcInfo.dnsHostName) {
+        Write-Log "Unable to establish connectivity to the domain. Please check network settings."
+        $goodToGo = $false
+        Stop-Transcript
+        Exit 1
+    }
+}
+catch {
+    Write-Log "Error checking domain connectivity: $_"
+    $goodToGo = $false
+    Stop-Transcript
+    Exit 1
 }
 
 # Main renaming logic
@@ -58,7 +84,7 @@ if ($goodToGo) {
             Stop-Transcript
             Exit 1
         }
-        
+            
         # Determine the asset tag or use BIOS serial number as a fallback
         if (($null -eq $systemEnclosure.SMBIOSAssetTag) -or ($systemEnclosure.SMBIOSAssetTag -eq "")) {
             $assetTag = $details.BiosSerialNumber
@@ -125,33 +151,14 @@ if ($goodToGo) {
         Exit 1
     }
 }
-else {
-    # Check to see if already scheduled
-    $existingTask = Get-ScheduledTask -TaskName "RenameComputer" -ErrorAction SilentlyContinue
-    if ($null -ne $existingTask) {
-        Write-Host "Scheduled task already exists."
-        Stop-Transcript
-        Exit 0
-    }
 
-    # Copy myself to a safe place if not already there
-    if (-not (Test-Path "$dest\RenameComputer.ps1")) {
-        Copy-Item $PSCommandPath "$dest\RenameComputer.PS1"
-    }
-
-    # Create the scheduled task action
-    $action = New-ScheduledTaskAction -Execute "Powershell.exe" -Argument "-NoProfile -ExecutionPolicy bypass -WindowStyle Hidden -File $dest\RenameComputer.ps1"
-
-    # Create the scheduled task trigger
-    $timespan = New-Timespan -minutes 5
-    $triggers = @()
-    $triggers += New-ScheduledTaskTrigger -Daily -At 9am
-    $triggers += New-ScheduledTaskTrigger -AtLogOn -RandomDelay $timespan
-    $triggers += New-ScheduledTaskTrigger -AtStartup -RandomDelay $timespan
-    
-    # Register the scheduled task
-    Register-ScheduledTask -User SYSTEM -Action $action -Trigger $triggers -TaskName "RenameComputer" -Description "RenameComputer" -Force
-    Write-Host "Scheduled task created."
+elseif ($details.CsUserName -notmatch "defaultUser") {
+    Write-Log "Script is running outside the Enrollment Status Page / Autopilot provisioning. Exiting script."
+    Stop-Transcript
+    Exit 1
 }
-
-Stop-Transcript
+else {
+    Write-Log "Unable to proceed with computer rename due to unmet prerequisites. Please check domain join status and network connectivity."
+    Stop-Transcript
+    Exit 1
+}
