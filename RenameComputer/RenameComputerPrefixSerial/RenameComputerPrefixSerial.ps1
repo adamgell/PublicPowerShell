@@ -8,7 +8,7 @@
 Param()
 
 # If we are running as a 32-bit process on an x64 system, re-launch as a 64-bit process
-if ("$env:PROCESSOR_ARCHITEW6432" -ne "ARM64")
+if ("$env:PROCESSOR_ARCHITECTURE" -ne "ARM64")
 {
     if (Test-Path "$($env:WINDIR)\SysNative\WindowsPowerShell\v1.0\powershell.exe")
     {
@@ -53,66 +53,84 @@ if ($null -eq $dcInfo.dnsHostName) {
     $goodToGo = $false
 }
 
+# Main renaming logic
 if ($goodToGo) {
-    # Get the new computer name
-    # Retrieve system enclosure information
-    $systemEnclosure = Get-CimInstance -ClassName Win32_SystemEnclosure
-
-    # Determine the asset tag
-    if (($null -eq $systemEnclosure.SMBIOSAssetTag) -or ($systemEnclosure.SMBIOSAssetTag -eq "")) {
-        # Handle PowerShell 5.1 bug
-        if ($null -ne $details.BiosSerialNumber) {
+    try {
+        # Get Win32_SystemEnclosure with error handling
+        try {
+            $systemEnclosure = Get-CimInstance -ClassName Win32_SystemEnclosure
+            Write-Log "Successfully retrieved Win32_SystemEnclosure information"
+        }
+        catch {
+            Write-Log "Error retrieving Win32_SystemEnclosure information: $_"
+            Stop-Transcript
+            Exit 1
+        }
+        
+        # Determine the asset tag or use BIOS serial number as a fallback
+        if (($null -eq $systemEnclosure.SMBIOSAssetTag) -or ($systemEnclosure.SMBIOSAssetTag -eq "")) {
             $assetTag = $details.BiosSerialNumber
+            Write-Log "Using BIOS Serial Number as asset tag: $assetTag"
         }
         else {
-            $assetTag = $details.BiosSerialNumber
+            $assetTag = $systemEnclosure.SMBIOSAssetTag
+            Write-Log "Using SMBIOSAssetTag as asset tag: $assetTag"
         }
-    }
-    else {
-        $assetTag = $systemEnclosure.SMBIOSAssetTag
-    }
 
-    # Get the current computer name and process it
-    $currentComputerName = $env:ComputerName
-    $tempComputerName = $currentComputerName.Split('-')
-    $assetTag = $assetTag.Replace("-", "")
+        # Uncomment this line to set a predefined asset tag if needed for testing purposes
+        # $assetTag = "PF4J0KCG"
 
-    # Trim the asset tag if it's longer than 12 characters
-    if ($assetTag.Length -gt 12) {
-        $serial = $assetTag.Substring(0, 10)
-    }
-    else {
-        $serial = $assetTag
-    }
+        $currentComputerName = $env:ComputerName
+        # Uncomment this line to set a predefined computername if needed for testing purposes
+        # $currentComputerName = "BFSSC-34128097234890423"
 
-    $user
-    # Construct the new computer name
-    $temp = $tempComputerName[0]
-    $newName = "$temp-$serial"
+        Write-Log "Current Computer Name: $currentComputerName"
 
-    # Display and set the new computer name
-    Write-Host "Renaming computer to $($newName)"
+        $tempComputerName = $currentComputerName.Split('-')
+        $prefix = $tempComputerName[0]
+        Write-Log "Prefix: $prefix"
 
-    $newName.Length
+        $assetTag = $assetTag.Replace("-", "").Replace(" ", "")
+        Write-Log "Cleaned Asset Tag: $assetTag"
 
-    Rename-Computer -NewName $newName
+        # Determine the system type and construct the new name
+        if ($details.CsPCSystemTypeEx -eq "Desktop") {
+            $newName = "$prefix" + "D" + "$assetTag"
+            Write-Log "Desktop system detected. Using naming format: PREFIX + D + ASSET TAG"
+        }
+        else {
+            $newName = "$prefix" + "$assetTag"
+            Write-Log "Non-desktop system detected. Using naming format: PREFIX + ASSET TAG"
+        }
 
-    # Remove the scheduled task
-    Disable-ScheduledTask -TaskName "RenameComputer" -ErrorAction Ignore
-    Unregister-ScheduledTask -TaskName "RenameComputer" -Confirm:$false -ErrorAction Ignore
-    Write-Host "Scheduled task unregistered."
+        # Ensure the new name doesn't exceed 15 characters
+        if ($newName.Length -gt 15) {
+            $newName = $newName.Substring(0, 15)
+            Write-Log "New name exceeded 15 characters. Truncated to: $newName"
+        }
 
-    # Make sure we reboot if still in ESP/OOBE by reporting a 1641 return code (hard reboot)
-    if ($details.CsUserName -match "defaultUser") {
-        Write-Host "Exiting during ESP/OOBE with return code 1641"
+        Write-Log "Constructed new computer name: $newName"
+
+        # Perform the actual rename operation
+        Write-Log "Initiating computer rename to: $newName"
+        Rename-Computer -NewName $newName -Force -ErrorAction Continue
+        Write-Log "Computer successfully renamed to: $newName"
+
+        # Create a tag file to indicate that this script has successfully run.
+        if (-not (Test-Path "$($env:ProgramData)\Microsoft\RenameComputer")) {
+            Mkdir "$($env:ProgramData)\Microsoft\RenameComputer"
+        }
+        Set-Content -Path "$($env:ProgramData)\Microsoft\RenameComputer\RenameComputer.ps1.tag" -Value "Installed"
+        Write-Log "Created tag file to indicate successful script execution"
+
+        Write-Log "Computer rename completed during ESP/OOBE phase. Exiting with code 1641 to initiate immediate reboot."
         Stop-Transcript
         Exit 1641
     }
-    else {
-        Write-Host "Initiating a restart in 1 minute"
-        & shutdown.exe /g /t 60 /f /c "Restarting the computer in 1 mintue due to a computer name change.  Save your work."
+    catch {
+        Write-Log "Error during rename process: $_"
         Stop-Transcript
-        Exit 0
+        Exit 1
     }
 }
 else {

@@ -132,7 +132,7 @@ if ($details.CsUserName -match "defaultUser") {
 
             # Perform the actual rename operation
             Write-Log "Initiating computer rename to: $newName"
-            Rename-Computer -NewName $newName -Force -ErrorAction Stop
+            Rename-Computer -NewName $newName -Force -ErrorAction Continue
             Write-Log "Computer successfully renamed to: $newName"
 
             # Create a tag file to indicate that this script has successfully run.
