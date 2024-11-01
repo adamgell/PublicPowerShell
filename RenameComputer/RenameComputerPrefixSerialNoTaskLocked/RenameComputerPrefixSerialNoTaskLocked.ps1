@@ -23,7 +23,7 @@ function Write-Log {
 Write-Log "Script execution started"
 
 # This section ensures the script runs in 64-bit mode on 64-bit systems.
-if ("$env:PROCESSOR_ARCHITEW6432" -ne "ARM64") {
+if ("$env:PROCESSOR_ARCHITECTURE" -ne "AMD64") {
     if (Test-Path "$($env:WINDIR)\SysNative\WindowsPowerShell\v1.0\powershell.exe") {
         Write-Log "Relaunching script in 64-bit PowerShell"
         & "$($env:WINDIR)\SysNative\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy bypass -File "$PSCommandPath" -Prefix $Prefix
