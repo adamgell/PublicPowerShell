@@ -13,7 +13,7 @@ function Create-Shortcut {
         $Shortcut.Arguments = "-showAppPicker"
         $Shortcut.WorkingDirectory = "C:\Program Files (x86)\Citrix\ICA Client\SelfServicePlugin\"
         $Shortcut.Description = "Select applications you want to use on your computer"
-        $Shortcut.IconLocation = "C:\Windows\Installer\{03BDC398-A50D-412F-A068-68999D22BCF8}\CRShort,0"
+        $Shortcut.IconLocation = "C:\Program Files (x86)\Citrix\ICA Client\SelfServicePlugin\SelfService.exe,0"
         $Shortcut.WindowStyle = 1
         $Shortcut.Save()
         Write-Host "Shortcut created successfully at $shortcutPath"
