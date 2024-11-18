@@ -37,7 +37,7 @@ foreach ($mailbox in $mailboxes) {
 }
 
 # Export results
-$report | Export-Csv -Path "ForwardingDisabled_$(Get-Date -Format 'yyyyMMdd').csv" -NoTypeInformation
+#$report | Export-Csv -Path "ForwardingDisabled_$(Get-Date -Format 'yyyyMMdd').csv" -NoTypeInformation
 
 # Display results
 $report | Format-Table -AutoSize
