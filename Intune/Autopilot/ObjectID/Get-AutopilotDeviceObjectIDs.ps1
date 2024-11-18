@@ -16,21 +16,32 @@ if ($powerShellGetVersion -lt [Version]"2.2.5") {
     }
 }
 
-# Check if the module WindowsAutopilotIntune is installed, if not, install it
-if (-not (Get-Module -ListAvailable -Name WindowsAutopilotIntune)) {
-    Install-Module -Name WindowsAutopilotIntune -Force -AllowClobber
+# Check and install required modules if not present
+$requiredModules = @(
+    'WindowsAutopilotIntune',
+    'Microsoft.Graph.Authentication',
+    'Microsoft.Graph.Entra'
+)
+
+foreach ($module in $requiredModules) {
+    if (-not (Get-Module -ListAvailable -Name $module)) {
+        Install-Module -Name $module -Force -AllowClobber
+    }
 }
 
-if (-not (Get-Module -ListAvailable -Name Microsoft.Graph.Authentication)) {
-    Install-Module -Name Microsoft.Graph.Authentication -Force -AllowClobber
-}
-if (-not (Get-Module -ListAvailable -Name Microsoft.Graph.Entra)) {
-    Install-Module -Name Microsoft.Graph.Entra -Force -AllowClobber
-}
+# Import WindowsAutopilotIntune
+Import-Module WindowsAutopilotIntune -Force
 
-Import-Module WindowsAutopilotIntune -Force 
-Import-Module Microsoft.Graph.Authentication -Force
-Import-Module Microsoft.Graph.Entra -Force
+# Import latest versions of Microsoft Graph modules
+$authModule = Get-Module -ListAvailable -Name Microsoft.Graph.Authentication | 
+    Sort-Object Version -Descending | 
+    Select-Object -First 1
+$entraModule = Get-Module -ListAvailable -Name Microsoft.Graph.Entra | 
+    Sort-Object Version -Descending | 
+    Select-Object -First 1
+
+Import-Module $authModule.Path -Force
+Import-Module $entraModule.Path -Force
 
 # Get script's directory and construct full paths
 $currentDir = Split-Path -Parent $MyInvocation.MyCommand.Path
