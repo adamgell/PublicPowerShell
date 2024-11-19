@@ -1,0 +1,60 @@
+# Save this as check-assemblies.ps1
+# This script will help identify loaded assemblies and potential conflicts
+
+Write-Host "Checking loaded assemblies..." -ForegroundColor Cyan
+
+# Get all loaded assemblies
+$loadedAssemblies = [System.AppDomain]::CurrentDomain.GetAssemblies() | 
+    Where-Object { $_.FullName -like "*Microsoft.Graph*" -or $_.FullName -like "*Entra*" } |
+    Select-Object FullName, Location, GlobalAssemblyCache
+
+# Display loaded assemblies
+Write-Host "`nCurrently loaded Microsoft Graph related assemblies:" -ForegroundColor Yellow
+$loadedAssemblies | Format-Table -AutoSize
+
+# Check for duplicate assemblies
+$duplicates = $loadedAssemblies | 
+    Group-Object { $_.FullName.Split(',')[0] } | 
+    Where-Object { $_.Count -gt 1 }
+
+if ($duplicates) {
+    Write-Host "`nFound duplicate assemblies:" -ForegroundColor Red
+    foreach ($dup in $duplicates) {
+        Write-Host "`nDuplicate set for: $($dup.Name)" -ForegroundColor Red
+        $dup.Group | ForEach-Object {
+            Write-Host "  Location: $($_.Location)"
+            Write-Host "  Full Name: $($_.FullName)`n"
+        }
+    }
+}
+
+# Check module paths
+Write-Host "`nChecking module paths..." -ForegroundColor Cyan
+$modulePaths = @(
+    "$env:ProgramFiles\PowerShell\Modules",
+    "$env:ProgramFiles\WindowsPowerShell\Modules",
+    "$env:USERPROFILE\Documents\PowerShell\Modules",
+    "$env:USERPROFILE\Documents\WindowsPowerShell\Modules"
+)
+
+foreach ($path in $modulePaths) {
+    if (Test-Path $path) {
+        Write-Host "`nChecking path: $path" -ForegroundColor Yellow
+        Get-ChildItem -Path $path -Filter "Microsoft.Graph*" -Directory -Recurse | 
+            ForEach-Object {
+                Write-Host "Found: $($_.FullName)"
+                if (Test-Path "$($_.FullName)\*.dll") {
+                    Write-Host "  Contains DLL files:" -ForegroundColor Magenta
+                    Get-ChildItem "$($_.FullName)\*.dll" | ForEach-Object {
+                        Write-Host "    $($_.Name)"
+                    }
+                }
+            }
+    }
+}
+
+# Get module details
+Write-Host "`nChecking installed Microsoft.Graph modules..." -ForegroundColor Cyan
+Get-Module -Name Microsoft.Graph* -ListAvailable | 
+    Select-Object Name, Version, Path | 
+    Format-Table -AutoSize
