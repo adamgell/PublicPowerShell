@@ -1,0 +1,78 @@
+# Save this as resolve-assembly-conflict.ps1
+
+# Function to clean up modules and assemblies
+function Reset-GraphEnvironment {
+    Write-Host "Cleaning up Graph environment..." -ForegroundColor Cyan
+    
+    # 1. Remove all Graph-related modules from the current session
+    Get-Module Microsoft.Graph* | Remove-Module -Force
+    Get-Module WindowsAutopilotIntune | Remove-Module -Force
+    
+    # 2. Clear PowerShell module analysis cache
+    $moduleCachePath = "$env:LOCALAPPDATA\Microsoft\Windows\PowerShell\ModuleAnalysisCache"
+    if (Test-Path $moduleCachePath) {
+        Remove-Item $moduleCachePath -Force
+        Write-Host "Cleared PowerShell module analysis cache" -ForegroundColor Green
+    }
+    
+    # 3. Import required modules in specific order
+    try {
+        # First import authentication
+        Import-Module Microsoft.Graph.Authentication -RequiredVersion "2.15.0" -Force -ErrorAction Stop
+        Write-Host "Imported Microsoft.Graph.Authentication" -ForegroundColor Green
+        
+        # Then import Entra
+        Import-Module Microsoft.Graph.Entra -RequiredVersion "2.15.0" -Force -ErrorAction Stop
+        Write-Host "Imported Microsoft.Graph.Entra" -ForegroundColor Green
+        
+        # Finally import Autopilot
+        Import-Module WindowsAutopilotIntune -Force -ErrorAction Stop
+        Write-Host "Imported WindowsAutopilotIntune" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "Error during module import: $_" -ForegroundColor Red
+        return $false
+    }
+    
+    return $true
+}
+
+# Function to verify assembly versions
+function Test-AssemblyVersions {
+    $assemblies = [System.AppDomain]::CurrentDomain.GetAssemblies() | 
+        Where-Object { $_.FullName -like "*Microsoft.Graph*" }
+    
+    Write-Host "`nCurrent Assembly Versions:" -ForegroundColor Yellow
+    foreach ($assembly in $assemblies) {
+        Write-Host "$($assembly.FullName)"
+        Write-Host "Location: $($assembly.Location)"
+    }
+}
+
+# Main execution
+Write-Host "Starting assembly conflict resolution..." -ForegroundColor Cyan
+
+# 1. Show current state
+Write-Host "`nBefore cleanup:" -ForegroundColor Yellow
+Test-AssemblyVersions
+
+# 2. Reset environment
+$success = Reset-GraphEnvironment
+
+# 3. Show new state
+if ($success) {
+    Write-Host "`nAfter cleanup:" -ForegroundColor Yellow
+    Test-AssemblyVersions
+    
+    Write-Host "`nEnvironment has been reset. You can now run your original script." -ForegroundColor Green
+    Write-Host "If you still experience issues, try running your script in a new PowerShell session." -ForegroundColor Yellow
+} else {
+    Write-Host "`nFailed to properly reset the environment. Please try the following:" -ForegroundColor Red
+    Write-Host "1. Close all PowerShell sessions"
+    Write-Host "2. Open a new PowerShell session as Administrator"
+    Write-Host "3. Run the following commands:"
+    Write-Host "   Uninstall-Module Microsoft.Graph.Entra -AllVersions"
+    Write-Host "   Uninstall-Module Microsoft.Graph.Authentication -AllVersions"
+    Write-Host "   Install-Module Microsoft.Graph.Authentication -RequiredVersion 2.15.0"
+    Write-Host "   Install-Module Microsoft.Graph.Entra -RequiredVersion 2.15.0"
+}
