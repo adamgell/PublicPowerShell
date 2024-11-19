@@ -1,3 +1,4 @@
+#Requires -Version 7.0
 # Check PowerShellGet version first
 $powerShellGetVersion = (Get-Module -ListAvailable -Name PowerShellGet | Sort-Object Version -Descending | Select-Object -First 1).Version
 Write-Host "Current PowerShellGet Version: $powerShellGetVersion"
@@ -16,32 +17,42 @@ if ($powerShellGetVersion -lt [Version]"2.2.5") {
     }
 }
 
-# Check and install required modules if not present
-$requiredModules = @(
-    'WindowsAutopilotIntune',
-    'Microsoft.Graph.Authentication',
-    'Microsoft.Graph.Entra'
+# Register and trust PSGallery
+if (-not (Get-PSRepository -Name "PSGallery" -ErrorAction SilentlyContinue)) {
+    Register-PSRepository -Default
+}
+Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
+
+# Install modules with proper flags
+$modules = @(
+    @{
+        Name = 'WindowsAutopilotIntune'
+        AllowPrerelease = $false
+    },
+    @{
+        Name = 'Microsoft.Graph.Authentication'
+        AllowPrerelease = $false
+    },
+    @{
+        Name = 'Microsoft.Graph.Entra'
+        AllowPrerelease = $true
+    }
 )
 
-foreach ($module in $requiredModules) {
-    if (-not (Get-Module -ListAvailable -Name $module)) {
-        Install-Module -Name $module -Force -AllowClobber
+foreach ($module in $modules) {
+    Write-Host "Checking module: $($module.Name)"
+    if (-not (Get-Module -ListAvailable -Name $module.Name)) {
+        try {
+            Install-Module @module -Repository PSGallery -Force -AllowClobber -ErrorAction Stop
+            Write-Host "$($module.Name) installed successfully" -ForegroundColor Green
+        }
+        catch {
+            Write-Host "Error installing $($module.Name): $_" -ForegroundColor Red
+            exit
+        }
     }
+    Import-Module $module.Name -Force
 }
-
-# Import WindowsAutopilotIntune
-Import-Module WindowsAutopilotIntune -Force
-
-# Import latest versions of Microsoft Graph modules
-$authModule = Get-Module -ListAvailable -Name Microsoft.Graph.Authentication | 
-    Sort-Object Version -Descending | 
-    Select-Object -First 1
-$entraModule = Get-Module -ListAvailable -Name Microsoft.Graph.Entra | 
-    Sort-Object Version -Descending | 
-    Select-Object -First 1
-
-Import-Module $authModule.Path -Force
-Import-Module $entraModule.Path -Force
 
 # Get script's directory and construct full paths
 $currentDir = Split-Path -Parent $MyInvocation.MyCommand.Path
