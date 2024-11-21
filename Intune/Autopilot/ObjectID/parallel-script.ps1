@@ -114,7 +114,7 @@ $failedDevices = 0
 
 # Create a queue of work items
 $workQueue = [System.Collections.Queue]::new($devices)
-$maxConcurrent = 5
+$maxConcurrent = 15
 $runningJobs = @{}
 
 # Process queue until empty

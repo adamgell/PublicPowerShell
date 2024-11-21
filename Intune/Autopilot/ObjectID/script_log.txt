@@ -1,17 +1,12 @@
 **********************
 PowerShell transcript start
-Start time: 20241121092003
+Start time: 20241121092252
 Username: HOME\adam_admin
 RunAs User: HOME\adam_admin
 Configuration Name: 
 Machine: PREFIXDEFAULTST (Microsoft Windows NT 10.0.26100.0)
-Host Application: C:\Program Files\PowerShell\7\pwsh.dll -NoProfile -ExecutionPolicy Bypass -Command Import-Module 'c:\Users\adam_admin\.vscode\extensions\ms-vscode.powershell-2024.4.0\modules\PowerShellEditorServices\PowerShellEditorServices.psd1'; Start-EditorServices -HostName 'Visual Studio Code Host' -HostProfileId 'Microsoft.VSCode' -HostVersion '2024.4.0' -BundledModulesPath 'c:\Users\adam_admin\.vscode\extensions\ms-vscode.powershell-2024.4.0\modules' -EnableConsoleRepl -StartupBanner "PowerShell Extension v2024.4.0
-Copyright (c) Microsoft Corporation.
-
-https://aka.ms/vscode-powershell
-Type 'help' to get help.
-" -LogLevel 'Normal' -LogPath 'c:\Users\adam_admin\AppData\Roaming\Code\User\globalStorage\ms-vscode.powershell\logs\1732198241-55c9ac95-a251-4e97-bbb6-8b15431ab0c91732198234834' -SessionDetailsPath 'c:\Users\adam_admin\AppData\Roaming\Code\User\globalStorage\ms-vscode.powershell\sessions\PSES-VSCode-48144-701866.json' -FeatureFlags @() 
-Process ID: 24352
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll
+Process ID: 16416
 PSVersion: 7.4.6
 PSEdition: Core
 GitCommitId: 7.4.6
@@ -29,10 +24,10 @@ Output CSV Path: E:\Repo\PublicPowerShell\Intune\Autopilot\ObjectID\ObjectIDList
 Log File Path: E:\Repo\PublicPowerShell\Intune\Autopilot\ObjectID\script_log.txt
 Existing ObjectIDList.csv deleted.
 Success: Serial 0F027W622363F6 - ObjectId: f47b2dfd-1362-41d5-a340-2abdab28f268
-Success: Serial 2452-5537-4047-2877-8904-0637-06 - ObjectId: b532c663-abf2-4eb2-9897-5f45d94daf86
 Success: Serial 0B33FX3213833F - ObjectId: 4c29bce6-61d3-44bd-b6cb-5f2651e67cd3
-Success: Serial 7133-1308-0330-9492-3895-3724-91 - ObjectId: 18b69b70-ae20-4724-b73c-946a14b5a588
+Success: Serial 2452-5537-4047-2877-8904-0637-06 - ObjectId: b532c663-abf2-4eb2-9897-5f45d94daf86
 Success: Serial 4944-0058-2262-2534-9707-3020-40 - ObjectId: e59133b7-69e2-4df6-a2dc-49e987c2b0f5
+Success: Serial 7133-1308-0330-9492-3895-3724-91 - ObjectId: 18b69b70-ae20-4724-b73c-946a14b5a588
 Success: Serial 7944-9385-5265-5964-6972-7532-66 - ObjectId: 98c82174-9503-4d7f-9b02-fe1f81158b29
 
 === Processing Summary ===
@@ -46,5 +41,5 @@ Script completed. Please check:
 - Log file: E:\Repo\PublicPowerShell\Intune\Autopilot\ObjectID\script_log.txt
 **********************
 PowerShell transcript end
-End time: 20241121092011
+End time: 20241121092257
 **********************
