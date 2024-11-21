@@ -1,20 +1,26 @@
-﻿**********************
-Windows PowerShell transcript start
-Start time: 20241025094325
+**********************
+PowerShell transcript start
+Start time: 20241121092003
 Username: HOME\adam_admin
 RunAs User: HOME\adam_admin
 Configuration Name: 
-Machine: LUCKY (Microsoft Windows NT 10.0.26100.0)
-Host Application: C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe
-Process ID: 43068
-PSVersion: 5.1.26100.1882
-PSEdition: Desktop
-PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.26100.1882
-BuildVersion: 10.0.26100.1882
-CLRVersion: 4.0.30319.42000
-WSManStackVersion: 3.0
+Machine: PREFIXDEFAULTST (Microsoft Windows NT 10.0.26100.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -NoProfile -ExecutionPolicy Bypass -Command Import-Module 'c:\Users\adam_admin\.vscode\extensions\ms-vscode.powershell-2024.4.0\modules\PowerShellEditorServices\PowerShellEditorServices.psd1'; Start-EditorServices -HostName 'Visual Studio Code Host' -HostProfileId 'Microsoft.VSCode' -HostVersion '2024.4.0' -BundledModulesPath 'c:\Users\adam_admin\.vscode\extensions\ms-vscode.powershell-2024.4.0\modules' -EnableConsoleRepl -StartupBanner "PowerShell Extension v2024.4.0
+Copyright (c) Microsoft Corporation.
+
+https://aka.ms/vscode-powershell
+Type 'help' to get help.
+" -LogLevel 'Normal' -LogPath 'c:\Users\adam_admin\AppData\Roaming\Code\User\globalStorage\ms-vscode.powershell\logs\1732198241-55c9ac95-a251-4e97-bbb6-8b15431ab0c91732198234834' -SessionDetailsPath 'c:\Users\adam_admin\AppData\Roaming\Code\User\globalStorage\ms-vscode.powershell\sessions\PSES-VSCode-48144-701866.json' -FeatureFlags @() 
+Process ID: 24352
+PSVersion: 7.4.6
+PSEdition: Core
+GitCommitId: 7.4.6
+OS: Microsoft Windows 10.0.26100
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
 PSRemotingProtocolVersion: 2.3
 SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
 **********************
 Transcript started, output file is E:\Repo\PublicPowerShell\Intune\Autopilot\ObjectID\script_log.txt
 Script Directory: E:\Repo\PublicPowerShell\Intune\Autopilot\ObjectID
@@ -22,20 +28,16 @@ Input CSV Path: E:\Repo\PublicPowerShell\Intune\Autopilot\ObjectID\serials.csv
 Output CSV Path: E:\Repo\PublicPowerShell\Intune\Autopilot\ObjectID\ObjectIDList.csv
 Log File Path: E:\Repo\PublicPowerShell\Intune\Autopilot\ObjectID\script_log.txt
 Existing ObjectIDList.csv deleted.
-
-Processing device 1 of 2
-Searching for device with Serial Number: 0F027W622363F6
-Autopilot Device ID: 33bd3786-53ff-4ae5-83f5-028a79de1937
-Found Entra Device Object ID: f47b2dfd-1362-41d5-a340-2abdab28f268
-
-Processing device 2 of 2
-Searching for device with Serial Number: 0B33FX3213833F
-Autopilot Device ID: 120e1615-1ddf-41cc-8bd4-9a1560825b55
-Found Entra Device Object ID: 4c29bce6-61d3-44bd-b6cb-5f2651e67cd3
+Success: Serial 0F027W622363F6 - ObjectId: f47b2dfd-1362-41d5-a340-2abdab28f268
+Success: Serial 2452-5537-4047-2877-8904-0637-06 - ObjectId: b532c663-abf2-4eb2-9897-5f45d94daf86
+Success: Serial 0B33FX3213833F - ObjectId: 4c29bce6-61d3-44bd-b6cb-5f2651e67cd3
+Success: Serial 7133-1308-0330-9492-3895-3724-91 - ObjectId: 18b69b70-ae20-4724-b73c-946a14b5a588
+Success: Serial 4944-0058-2262-2534-9707-3020-40 - ObjectId: e59133b7-69e2-4df6-a2dc-49e987c2b0f5
+Success: Serial 7944-9385-5265-5964-6972-7532-66 - ObjectId: 98c82174-9503-4d7f-9b02-fe1f81158b29
 
 === Processing Summary ===
-Total devices processed: 2
-Successfully processed: 2
+Total devices processed: 6
+Successfully processed: 6
 Failed to process: 0
 Success rate: 100%
 
@@ -43,6 +45,6 @@ Script completed. Please check:
 - Output file: E:\Repo\PublicPowerShell\Intune\Autopilot\ObjectID\ObjectIDList.csv
 - Log file: E:\Repo\PublicPowerShell\Intune\Autopilot\ObjectID\script_log.txt
 **********************
-Windows PowerShell transcript end
-End time: 20241025094328
+PowerShell transcript end
+End time: 20241121092011
 **********************

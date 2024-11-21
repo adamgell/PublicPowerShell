@@ -70,7 +70,8 @@ if (Test-Path $outputFile) {
     if ($confirmation -eq 'Y') {
         Remove-Item $outputFile
         Write-Host "Existing ObjectIDList.csv deleted."
-    } else {
+    }
+    else {
         Write-Host "Operation cancelled. Please remove or rename the existing ObjectIDList.csv and try again."
         Stop-Transcript
         exit
@@ -84,8 +85,8 @@ if (-not (Test-Path $csvFile)) {
     exit
 }
 
-$csvContent = Import-Csv $csvFile
-if ($null -eq $csvContent -or @($csvContent).Count -eq 0) {
+$devices = Import-Csv $csvFile
+if ($null -eq $devices -or @($devices).Count -eq 0) {
     Write-Error "serials.csv is empty or not properly formatted!"
     Stop-Transcript
     exit
@@ -95,109 +96,139 @@ if ($null -eq $csvContent -or @($csvContent).Count -eq 0) {
 "version:v1.0" | Set-Content -Path $outputFile
 "[memberObjectIdOrUpn]" | Add-Content -Path $outputFile
 
-# Connect to Microsoft Graph with the required scopes
-$scopes = @("DeviceManagementServiceConfig.Read.All", "Device.Read.All")
-Connect-MgGraph -Scopes $scopes -NoWelcome
+# Connect to Microsoft Graph and save connection info
+$graphConnection = Connect-MgGraph -Scopes @("DeviceManagementServiceConfig.Read.All", "Device.Read.All") -NoWelcome
+$mgContext = Get-MgContext
 
-# Initialize counters using thread-safe variables
-$totalDevices = @($csvContent).Count
-$script:processedDevices = [int]0
-$script:successfulDevices = [int]0
-$script:failedDevices = [int]0
+if (-not $mgContext) {
+    Write-Error "Failed to establish Microsoft Graph connection"
+    Stop-Transcript
+    exit
+}
 
-# Create a mutex for thread-safe file writing
-$mutex = [System.Threading.Mutex]::new($false, "OutputFileMutex")
+# Initialize counters
+$totalDevices = $devices.Count
+$processedDevices = 0
+$successfulDevices = 0
+$failedDevices = 0
 
-# Get csv file with the list of devices to search for 
-$devices = Import-Csv $csvFile
+# Create a queue of work items
+$workQueue = [System.Collections.Queue]::new($devices)
+$maxConcurrent = 5
+$runningJobs = @{}
 
-# Set the maximum number of parallel jobs
-$maxParallelJobs = 10
-
-# Create a throttle limit parameter
-$throttleLimit = [int]::Min($maxParallelJobs, $totalDevices)
-
-# Process devices in parallel
-$devices | ForEach-Object -ThrottleLimit $throttleLimit -Parallel {
-    # Import required modules in parallel runspace
-    Import-Module Microsoft.Graph.Authentication -ErrorAction SilentlyContinue
-    Import-Module WindowsAutopilotIntune -ErrorAction SilentlyContinue
-
-    # Get variables from parent scope
-    $outputFile = $using:outputFile
-    $mutex = $using:mutex
-
-    # Assuming the CSV has a column named 'SerialNumber'
-    $serialNumber = $_.SerialNumber
-    $processedCount = [System.Threading.Interlocked]::Increment([ref]$using:processedDevices)
-    
-    Write-Host "`nProcessing device $processedCount of $using:totalDevices"
-    Write-Host "Searching for device with Serial Number: $serialNumber"
-    
-    try {
-        # Get Autopilot device by serial number
-        $autopilotDevice = Get-AutopilotDevice | Where-Object { $_.serialNumber -eq $serialNumber }
+# Process queue until empty
+while ($workQueue.Count -gt 0 -or $runningJobs.Count -gt 0) {
+    # Start new jobs if queue has items and we're below max concurrent
+    while ($workQueue.Count -gt 0 -and $runningJobs.Count -lt $maxConcurrent) {
+        $device = $workQueue.Dequeue()
+        $processedDevices++
         
-        if ($null -eq $autopilotDevice) {
-            Write-Host "No Autopilot device found with Serial Number: $serialNumber" -ForegroundColor Yellow
-            [System.Threading.Interlocked]::Increment([ref]$using:failedDevices)
-            return
-        }
-
-        $AP_DeviceID = $autopilotDevice.azureAdDeviceId
-        Write-Host "Autopilot Device ID: $AP_DeviceID"
-        
-        if ($null -eq $AP_DeviceID) {
-            Write-Host "No Azure AD Device ID found for Serial Number: $serialNumber" -ForegroundColor Yellow
-            [System.Threading.Interlocked]::Increment([ref]$using:failedDevices)
-            return
-        }
-
-        # Use direct Graph API request
-        $graphUri = "https://graph.microsoft.com/v1.0/devices?`$filter=deviceId eq '$AP_DeviceID'"
-        try {
-            $graphResponse = Invoke-MgGraphRequest -Uri $graphUri -Method GET
-            $objectId = $graphResponse.value[0].id
+        $jobScript = {
+            param($serialNumber)
             
-            if ($objectId) {
-                Write-Host "Found Device Object ID: $objectId" -ForegroundColor Green
+            try {
+                # Get Autopilot device
+                Import-Module WindowsAutopilotIntune
+                Import-Module Microsoft.Graph.Authentication
                 
-                # Thread-safe file writing using mutex
-                $mutex.WaitOne() | Out-Null
-                try {
-                    $objectId | Add-Content -Path $outputFile
-                } finally {
-                    $mutex.ReleaseMutex()
+                # Connect to Graph with same scopes as parent
+                Connect-MgGraph -Scopes @("DeviceManagementServiceConfig.Read.All", "Device.Read.All") -NoWelcome | Out-Null
+                
+                $autopilotDevice = Get-AutopilotDevice | Where-Object { $_.serialNumber -eq $serialNumber }
+                if ($null -eq $autopilotDevice) {
+                    return @{
+                        Success = $false
+                        Message = "No Autopilot device found"
+                        SerialNumber = $serialNumber
+                    }
                 }
+
+                $AP_DeviceID = $autopilotDevice.azureAdDeviceId
+                if ($null -eq $AP_DeviceID) {
+                    return @{
+                        Success = $false
+                        Message = "No Azure AD Device ID found"
+                        SerialNumber = $serialNumber
+                    }
+                }
+
+                # Query Graph API
+                $graphUri = "https://graph.microsoft.com/v1.0/devices?`$filter=deviceId eq '$AP_DeviceID'"
+                $graphResponse = Invoke-MgGraphRequest -Uri $graphUri -Method GET
+                $objectId = $graphResponse.value[0].id
                 
-                [System.Threading.Interlocked]::Increment([ref]$using:successfulDevices)
-            } else {
-                Write-Host "No device found with Device ID: $AP_DeviceID" -ForegroundColor Yellow
-                [System.Threading.Interlocked]::Increment([ref]$using:failedDevices)
+                if ($objectId) {
+                    return @{
+                        Success = $true
+                        ObjectId = $objectId
+                        SerialNumber = $serialNumber
+                    }
+                }
+                else {
+                    return @{
+                        Success = $false
+                        Message = "No device found in Graph API"
+                        SerialNumber = $serialNumber
+                    }
+                }
             }
-        } catch {
-            Write-Host "Error querying Graph API: $_" -ForegroundColor Red
-            [System.Threading.Interlocked]::Increment([ref]$using:failedDevices)
+            catch {
+                return @{
+                    Success = $false
+                    Message = $_.Exception.Message
+                    SerialNumber = $serialNumber
+                }
+            }
+        }
+
+        $job = Start-Job -ScriptBlock $jobScript -ArgumentList $device.SerialNumber
+        $runningJobs[$job.Id] = @{
+            Job = $job
+            SerialNumber = $device.SerialNumber
+            StartTime = Get-Date
         }
     }
-    catch {
-        Write-Error "Error processing Serial Number $serialNumber : $_"
-        [System.Threading.Interlocked]::Increment([ref]$using:failedDevices)
+
+    # Check completed jobs
+    $completedJobs = @($runningJobs.Keys | Where-Object { $runningJobs[$_].Job.State -eq 'Completed' })
+    foreach ($jobId in $completedJobs) {
+        $jobInfo = $runningJobs[$jobId]
+        $result = Receive-Job -Job $jobInfo.Job
+
+        # Write result with color coding
+        if ($result.Success) {
+            Write-Host "Success: Serial $($result.SerialNumber) - ObjectId: $($result.ObjectId)" -ForegroundColor Green
+            $result.ObjectId | Add-Content -Path $outputFile
+            $successfulDevices++
+        }
+        else {
+            Write-Host "Failed: Serial $($result.SerialNumber) - $($result.Message)" -ForegroundColor Yellow
+            $failedDevices++
+        }
+
+        # Cleanup job
+        Remove-Job -Job $jobInfo.Job
+        $runningJobs.Remove($jobId)
     }
-} -AsJob | Wait-Job | Receive-Job
+
+    # Progress update
+    Write-Progress -Activity "Processing Devices" -Status "Processing $($runningJobs.Count) devices" `
+        -PercentComplete (($processedDevices / $totalDevices) * 100) `
+        -CurrentOperation "Completed: $($successfulDevices + $failedDevices) of $totalDevices"
+
+    Start-Sleep -Milliseconds 100
+}
 
 # Display summary
 Write-Host "`n=== Processing Summary ===" -ForegroundColor Cyan
 Write-Host "Total devices processed: $totalDevices"
-Write-Host "Successfully processed: $script:successfulDevices" -ForegroundColor Green
-Write-Host "Failed to process: $script:failedDevices" -ForegroundColor Yellow
-Write-Host "Success rate: $([math]::Round(($script:successfulDevices/$totalDevices)*100,2))%"
+Write-Host "Successfully processed: $successfulDevices" -ForegroundColor Green
+Write-Host "Failed to process: $failedDevices" -ForegroundColor Yellow
+Write-Host "Success rate: $([math]::Round(($successfulDevices/$totalDevices)*100,2))%"
 
 Write-Host "`nScript completed. Please check:"
 Write-Host "- Output file: $outputFile"
 Write-Host "- Log file: $logFile"
-
-# Clean up mutex
-$mutex.Dispose()
 
 Stop-Transcript

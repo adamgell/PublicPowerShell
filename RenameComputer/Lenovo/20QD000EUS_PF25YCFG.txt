@@ -1,0 +1,3 @@
+-------------11/19/2024 9:07:16 AM--------------
+BiosVersion: N2HET78W (1.61 )
+Gathering settings for X1Carbon7th

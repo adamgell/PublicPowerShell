@@ -1,0 +1,20 @@
+Next steps:
+
+1) create flash drive cmd file to kick off the automated hash and naming process
+2) create an app reg for the hash to get automatically imported
+3) prompt for the asset number of the device 
+
+FLASH DRIVE LAYOUT
+
+ROOT ->
+    - Script.ps1
+    - WINANA64.exe
+
+
+Open a prompt with SHIFT F10 (laptops needs FN key down)
+type: Powershell -ex bypass
+type: get-volume
+this will then show you the drive letter of the flash drive
+D:\go.ps1
+it will capture and upload the hash 
+ask and set the asset number of the computer 
