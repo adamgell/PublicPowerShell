@@ -3,6 +3,7 @@
 
 # Define the registry paths
 $registryPaths = @(
+    'HKLM:\SOFTWARE\Microsoft\PolicyManager\current\device\Update',
     'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate',
     'HKLM:\SOFTWARE\POLICIES\Microsoft\Windows\Update\AU',
     'HKLM:\SOFTWARE\POLICIES\Microsoft\Windows\Update',
@@ -10,6 +11,7 @@ $registryPaths = @(
     "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\GPCache\CacheSet001\WindowsUpdate",
     "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\GPCache\CacheSet002\WindowsUpdate"
 )
+
 
 # Loop through each registry path-
 foreach ($registryPath in $registryPaths) {

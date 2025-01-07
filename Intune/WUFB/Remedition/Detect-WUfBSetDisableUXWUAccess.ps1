@@ -9,15 +9,15 @@ $registryPaths = @(
     "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\GPCache\CacheSet002\WindowsUpdate"
 )
 
-
-# Define the registry entries to check
-$registryEntries = @("ManagePreviewBuilds", "ManagePreviewBuilds_ProviderSet", "ManagePreviewBuilds_WinningProvider")
+# Define the registry entries to remove
+$registryEntries = @("SetDisableUXWUAccess")
 
 # Flag to track if any registry entry is found
 $entryFound = $false
 
 # Loop through each registry path
 foreach ($registryPath in $registryPaths) {
+    Write-Output "Looking at registry path: $registryPath"
     # Check if the registry path exists
     if (Test-Path $registryPath) {
         # Loop through each registry entry
@@ -30,6 +30,9 @@ foreach ($registryPath in $registryPaths) {
                 break
             }
         }
+    }
+    else {
+        Write-Output "Registry path not found"
     }
 }
 

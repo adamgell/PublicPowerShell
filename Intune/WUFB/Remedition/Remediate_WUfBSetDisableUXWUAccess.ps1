@@ -9,9 +9,8 @@ $registryPaths = @(
     "HKLM:\SOFTWARE\Microsoft\WindowsUpdate\UpdatePolicy\GPCache\CacheSet002\WindowsUpdate"
 )
 
-
 # Define the registry entries to remove
-$registryEntries = @("ManagePreviewBuilds", "ManagePreviewBuilds_ProviderSet", "ManagePreviewBuilds_WinningProvider")
+$registryEntries = @("SetDisableUXWUAccess")
 
 # Loop through each registry path
 foreach ($registryPath in $registryPaths) {

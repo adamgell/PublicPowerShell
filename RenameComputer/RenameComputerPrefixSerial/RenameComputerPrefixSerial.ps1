@@ -113,11 +113,11 @@ if ($goodToGo) {
 
         # Determine the system type and construct the new name
         if ($details.CsPCSystemTypeEx -eq "Desktop") {
-            $newName = "$prefix" + "D" + "$assetTag"
+            $newName = "$prefix" + "PC" + "$assetTag"
             Write-Log "Desktop system detected. Using naming format: PREFIX + D + ASSET TAG"
         }
         else {
-            $newName = "$prefix" + "$assetTag"
+            $newName = "$prefix" + "LT" + "$assetTag"
             Write-Log "Non-desktop system detected. Using naming format: PREFIX + ASSET TAG"
         }
 
