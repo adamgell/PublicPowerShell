@@ -5,14 +5,16 @@ param(
     [Parameter(Mandatory = $true)]
     [ValidateScript({ Test-Path $_ -PathType Leaf })] # Ensure the ISO file exists
     [string]$IsoPath,
-    
     [Parameter(Mandatory = $true)]
     [string]$VMName,
-    
     [uint64]$VHDXSizeBytes = 120GB,
     [int64]$MemoryStartupBytes = 4GB,
     [int64]$ProcessorCount = 2,
-    [string]$SwitchName = "Default Switch" # Changed to a more commonly available switch name; adjust as needed
+    [ArgumentCompleter({
+        param($Command, $Parameter, $WordToComplete, $CommandAst, $FakeBoundParams)
+        (Get-VMSwitch).Name | Where-Object { $_ -like "$WordToComplete*" }
+    })]
+    [string]$SwitchName = "Default Switch"
 )
 
 $ErrorActionPreference = 'Stop'

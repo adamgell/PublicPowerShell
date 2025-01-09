@@ -26,7 +26,7 @@
 
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $true)]
+    [Parameter(Mandatory = $false)]
     [string]$Site,
     
     [Parameter(Mandatory = $false)]
@@ -300,7 +300,7 @@ function Get-MachineSerialNumber {
         }
         
         if ($serialNumber -eq 'System Serial Number') {
-            #Write-LogEntry -Value "Non-unique serial number detected, generating random serial" -Severity 2
+            Write-LogEntry -Value "Non-unique serial number detected, generating random serial" -Severity 2
             return Get-RandomSerialNumber
         }
 
@@ -387,7 +387,7 @@ function Get-DeviceType {
         $chassisTypes = $systemEnclosure.ChassisTypes
         
         $laptopTypes = @(
-            9,  # Laptop
+            9, # Laptop
             10, # Notebook
             14, # Sub Notebook
             30, # Tablet
@@ -403,7 +403,8 @@ function Get-DeviceType {
             }
         }
         
-        Write-LogEntry -Value "Device detected as $($isLaptop ? 'Laptop' : 'Desktop') (ChassisType: $($chassisTypes -join ', '))" -Severity 1
+        $deviceType = if ($isLaptop) { 'Laptop' } else { 'Desktop' }
+        Write-LogEntry -Value "Device detected as $deviceType (ChassisType: $($chassisTypes -join ', '))" -Severity 1
         return $isLaptop
     }
     catch {
@@ -412,7 +413,7 @@ function Get-DeviceType {
     }
 }
 
-#region Main Functions
+#region 
 function Rename-ComputerBySite {
     try {
         if ($TestMode) {
@@ -493,7 +494,21 @@ $siteName = foreach ($site in ($SITE_CONFIG).Keys) {
 
 $siteName = $siteName | Sort-Object
 
-function Test-AllNamingPatterns {
+#main execution
+
+$serialNumber = Get-MachineSerialNumber
+$isLaptop = $deviceType -eq 'Laptop'
+            
+try {
+    $result = Get-ComputerNameTemplate -Site $site -SerialNumber $serialNumber -IsLaptop $isLaptop
+    Write-LogEntry -Value $result -Severity 1 -textcolor "white"
+}
+catch {
+    Write-LogEntry -Value "Failed to generate name for $site ($deviceType): $($_.Exception.Message)" -Severity 3
+}
+
+#testing all naming patterns
+<# function Test-AllNamingPatterns {
     param (
         [Parameter(Mandatory = $true)]
         [array]$Sites
@@ -523,5 +538,5 @@ function Test-AllNamingPatterns {
     }
 }
 
-Test-AllNamingPatterns -Sites $siteName
+Test-AllNamingPatterns -Sites $siteName #>
 
