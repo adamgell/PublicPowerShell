@@ -145,7 +145,7 @@ Else {
 # report of license assignments to users. This report is useful to detect duplicate licenses and
 # to help allocate license costs to operating units within an organization. Set the value to false
 # if you don't want to generate the detailed report.
-$DetailedCompanyAnalyis = $true
+$DetailedCompanyAnalyis = $false
 
 $OrgName = (Get-MgOrganization).DisplayName
 
