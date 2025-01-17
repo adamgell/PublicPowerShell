@@ -383,101 +383,96 @@ function Get-ComputerNameTemplate {
 
 function Get-SiteFromSubnet {
     try {
-        # Helper function to validate IP address format
-        function Test-IPAddress {
-            param([string]$IP)
-            [bool]($IP -as [IPAddress])
-        }
-
-        # Get all IP addresses with better filtering
-        $ipAddresses = Get-NetIPAddress -AddressFamily IPv4 | 
-            Where-Object { 
-                $_.IPAddress -notmatch '^(169\.254\.|127\.)' -and 
-                (Test-IPAddress $_.IPAddress)
-            } |
-            Select-Object -ExpandProperty IPAddress
-
-        # Safely get external IP
+        # Get all IP addresses with strict validation
+        $ipAddresses = @()
+        
+        # Get local IPs
+        Get-NetIPAddress -AddressFamily IPv4 | 
+            Where-Object { $_.IPAddress -notmatch '^(169\.254\.|127\.)' } |
+            ForEach-Object {
+                if ($_.IPAddress -match '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$') {
+                    $ipAddresses += $_.IPAddress
+                }
+                else {
+                    Write-LogEntry -Value "Skipping malformed local IP: $($_.IPAddress)" -Severity 2
+                }
+            }
+        
+        # Get external IP
         try {
             $externalIP = Invoke-RestMethod -Uri 'https://api.ipify.org?format=text' -ErrorAction Stop
-            if (Test-IPAddress $externalIP) {
-                $ipAddresses += $externalIP
+            if ($externalIP -match '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$') {
                 Write-LogEntry -Value "External IP found: $externalIP" -Severity 1
+                $ipAddresses += $externalIP
+            }
+            else {
+                Write-LogEntry -Value "Skipping malformed external IP: $externalIP" -Severity 2
             }
         }
         catch {
             Write-LogEntry -Value "Could not retrieve external IP: $($_.Exception.Message)" -Severity 2
         }
 
-        # Log all valid IPs found
-        Write-LogEntry -Value "Found valid IP addresses: $($ipAddresses -join ', ')" -Severity 1
+        if ($ipAddresses.Count -eq 0) {
+            Write-LogEntry -Value "No valid IP addresses found" -Severity 2
+            return "REMOTE"
+        }
 
-        # Check each IP against site configs
+        Write-LogEntry -Value "Valid IP addresses found: $($ipAddresses -join ', ')" -Severity 1
+
+        # Check WAN IPs first (since it's an exact match)
         foreach ($ip in $ipAddresses) {
-            # Skip invalid IPs
-            if (-not (Test-IPAddress $ip)) {
-                Write-LogEntry -Value "Skipping invalid IP: $ip" -Severity 2
-                continue
-            }
-
-            # First check subnet matches
             foreach ($siteName in $SITE_CONFIG.Keys) {
                 $siteConfig = $SITE_CONFIG[$siteName]
                 
-                if (-not [string]::IsNullOrEmpty($siteConfig.SubnetPrefix) -and 
-                    $siteConfig.SubnetPrefix -ne 'TBD') {
+                if (-not [string]::IsNullOrEmpty($siteConfig.WanIP) -and $siteConfig.WanIP -ne 'TBD') {
+                    $wanIPs = $siteConfig.WanIP -split ';' | ForEach-Object { $_.Trim() -replace '/32$', '' }
                     
-                    try {
-                        $subnet = $siteConfig.SubnetPrefix -split '/'
-                        if ($subnet.Count -eq 2) {
-                            $networkIP = [System.Net.IPAddress]::Parse($subnet[0])
-                            $maskLength = [int]$subnet[1]
-                            $mask = ([Math]::Pow(2, $maskLength) - 1) * [Math]::Pow(2, (32 - $maskLength))
-                            $maskBytes = [BitConverter]::GetBytes([UInt32]$mask)
-                            [Array]::Reverse($maskBytes)
-                            $netMask = [System.Net.IPAddress]::new($maskBytes)
-
-                            $ipAddr = [System.Net.IPAddress]::Parse($ip)
-                            $networkAddr = [System.Net.IPAddress]($ipAddr.Address -band $netMask.Address)
-                            $subnetAddr = [System.Net.IPAddress]($networkIP.Address -band $netMask.Address)
-                            
-                            if ($networkAddr.Equals($subnetAddr)) {
-                                Write-LogEntry -Value "IP $ip matches subnet for site $siteName" -Severity 1
-                                return $siteName
-                            }
-                        }
-                    }
-                    catch {
-                        Write-LogEntry -Value "Error processing subnet for $siteName`: $($_.Exception.Message)" -Severity 2
-                        continue
-                    }
-                }
-            }
-
-            # Then check WAN IP matches
-            foreach ($siteName in $SITE_CONFIG.Keys) {
-                $siteConfig = $SITE_CONFIG[$siteName]
-                
-                if (-not [string]::IsNullOrEmpty($siteConfig.WanIP) -and 
-                    $siteConfig.WanIP -ne 'TBD') {
-                    
-                    # Handle multiple WAN IPs properly
-                    $wanIPs = $siteConfig.WanIP -split ';' | 
-                        ForEach-Object { $_.Trim() } | 
-                        Where-Object { -not [string]::IsNullOrEmpty($_) }
-                    
-                    foreach ($wanIP in $wanIPs) {
-                        $wan = $wanIP -replace '/32$', ''  # Remove /32 if present
-                        if (Test-IPAddress $wan -and $ip -eq $wan) {
-                            Write-LogEntry -Value "IP $ip matches WAN IP for site $siteName" -Severity 1
-                            return $siteName
-                        }
+                    if ($wanIPs -contains $ip) {
+                        Write-LogEntry -Value "IP $ip matches WAN IP for site $siteName" -Severity 1
+                        return $siteName
                     }
                 }
             }
         }
 
-        Write-LogEntry -Value "No site match found for any IP address, defaulting to REMOTE" -Severity 2
+        # Then check subnets
+        foreach ($ip in $ipAddresses) {
+            foreach ($siteName in $SITE_CONFIG.Keys) {
+                $siteConfig = $SITE_CONFIG[$siteName]
+                
+                if ([string]::IsNullOrEmpty($siteConfig.SubnetPrefix) -or $siteConfig.SubnetPrefix -eq 'TBD') {
+                    continue
+                }
+
+                try {
+                    $subnet = $siteConfig.SubnetPrefix -split '/'
+                    if ($subnet.Count -ne 2) { continue }
+
+                    $networkIP = [System.Net.IPAddress]::Parse($subnet[0])
+                    $maskLength = [int]$subnet[1]
+                    $mask = ([Math]::Pow(2, $maskLength) - 1) * [Math]::Pow(2, (32 - $maskLength))
+                    $maskBytes = [BitConverter]::GetBytes([UInt32]$mask)
+                    [Array]::Reverse($maskBytes)
+                    $netMask = [System.Net.IPAddress]::new($maskBytes)
+
+                    $ipAddr = [System.Net.IPAddress]::Parse($ip)
+                    $networkAddr = [System.Net.IPAddress]($ipAddr.Address -band $netMask.Address)
+                    $subnetAddr = [System.Net.IPAddress]($networkIP.Address -band $netMask.Address)
+                    
+                    if ($networkAddr.Equals($subnetAddr)) {
+                        Write-LogEntry -Value "IP $ip matches subnet for site $siteName" -Severity 1
+                        return $siteName
+                    }
+                }
+                catch {
+                    Write-LogEntry -Value "Error processing subnet for $siteName`: $($_.Exception.Message)" -Severity 2
+                    continue
+                }
+            }
+        }
+
+        Write-LogEntry -Value "No site match found for any IP address" -Severity 2
         return "REMOTE"
     }
     catch {
