@@ -160,7 +160,7 @@ $SITE_CONFIG = @{
     }
     'RACINE'       = @{
         SubnetPrefix  = '10.1.0.0/16'
-        WanIP         = '38.71.70.17/32; 38.71.70.18/32; 38.71.70.19/32'
+        WanIP         = '38.71.70.17/32'
         TimeZone      = 'Central Standard Time'
         NamingPattern = 'Full'
         SiteCode      = 'RA'
@@ -383,86 +383,109 @@ function Get-ComputerNameTemplate {
 
 function Get-SiteFromSubnet {
     try {
-        # Get all IP addresses
-        $ipAddresses = Get-NetIPAddress -AddressFamily IPv4 | 
-            Where-Object { $_.IPAddress -notmatch '^(169\.254\.|127\.)' } |
-            Select-Object -ExpandProperty IPAddress
-        
-        # Get external IP if available
-        $externalIP = Invoke-RestMethod -Uri 'https://api.ipify.org?format=text' -ErrorAction SilentlyContinue
-        if ($externalIP) {
-            $ipAddresses += $externalIP
+        # Helper function to validate IP address format
+        function Test-IPAddress {
+            param([string]$IP)
+            [bool]($IP -as [IPAddress])
         }
 
-        Write-LogEntry -Value "Found IP addresses: $($ipAddresses -join ', ')" -Severity 1
+        # Get all IP addresses with better filtering
+        $ipAddresses = Get-NetIPAddress -AddressFamily IPv4 | 
+            Where-Object { 
+                $_.IPAddress -notmatch '^(169\.254\.|127\.)' -and 
+                (Test-IPAddress $_.IPAddress)
+            } |
+            Select-Object -ExpandProperty IPAddress
+
+        # Safely get external IP
+        try {
+            $externalIP = Invoke-RestMethod -Uri 'https://api.ipify.org?format=text' -ErrorAction Stop
+            if (Test-IPAddress $externalIP) {
+                $ipAddresses += $externalIP
+                Write-LogEntry -Value "External IP found: $externalIP" -Severity 1
+            }
+        }
+        catch {
+            Write-LogEntry -Value "Could not retrieve external IP: $($_.Exception.Message)" -Severity 2
+        }
+
+        # Log all valid IPs found
+        Write-LogEntry -Value "Found valid IP addresses: $($ipAddresses -join ', ')" -Severity 1
 
         # Check each IP against site configs
         foreach ($ip in $ipAddresses) {
+            # Skip invalid IPs
+            if (-not (Test-IPAddress $ip)) {
+                Write-LogEntry -Value "Skipping invalid IP: $ip" -Severity 2
+                continue
+            }
+
+            # First check subnet matches
             foreach ($siteName in $SITE_CONFIG.Keys) {
                 $siteConfig = $SITE_CONFIG[$siteName]
                 
-                # Skip if no subnet prefix defined
-                if ([string]::IsNullOrEmpty($siteConfig.SubnetPrefix) -or $siteConfig.SubnetPrefix -eq 'TBD') {
-                    continue
-                }
+                if (-not [string]::IsNullOrEmpty($siteConfig.SubnetPrefix) -and 
+                    $siteConfig.SubnetPrefix -ne 'TBD') {
+                    
+                    try {
+                        $subnet = $siteConfig.SubnetPrefix -split '/'
+                        if ($subnet.Count -eq 2) {
+                            $networkIP = [System.Net.IPAddress]::Parse($subnet[0])
+                            $maskLength = [int]$subnet[1]
+                            $mask = ([Math]::Pow(2, $maskLength) - 1) * [Math]::Pow(2, (32 - $maskLength))
+                            $maskBytes = [BitConverter]::GetBytes([UInt32]$mask)
+                            [Array]::Reverse($maskBytes)
+                            $netMask = [System.Net.IPAddress]::new($maskBytes)
 
-                # Convert subnet to IP and mask
-                $subnet = $siteConfig.SubnetPrefix -split '/'
-                if ($subnet.Count -ne 2) {
-                    continue
-                }
-
-                $networkIP = [System.Net.IPAddress]::Parse($subnet[0])
-                $maskLength = [int]$subnet[1]
-                $mask = ([Math]::Pow(2, $maskLength) - 1) * [Math]::Pow(2, (32 - $maskLength))
-                $maskBytes = [BitConverter]::GetBytes([UInt32]$mask)
-                [Array]::Reverse($maskBytes)
-                $netMask = [System.Net.IPAddress]::new($maskBytes)
-
-                # Convert IP address to test
-                $ipAddr = [System.Net.IPAddress]::Parse($ip)
-                
-                # Compare network portions
-                $networkAddr = [System.Net.IPAddress]($ipAddr.Address -band $netMask.Address)
-                $subnetAddr = [System.Net.IPAddress]($networkIP.Address -band $netMask.Address)
-                
-                if ($networkAddr.Equals($subnetAddr)) {
-                    Write-LogEntry -Value "IP $ip matches subnet for site $siteName" -Severity 1
-                    return $siteName
+                            $ipAddr = [System.Net.IPAddress]::Parse($ip)
+                            $networkAddr = [System.Net.IPAddress]($ipAddr.Address -band $netMask.Address)
+                            $subnetAddr = [System.Net.IPAddress]($networkIP.Address -band $netMask.Address)
+                            
+                            if ($networkAddr.Equals($subnetAddr)) {
+                                Write-LogEntry -Value "IP $ip matches subnet for site $siteName" -Severity 1
+                                return $siteName
+                            }
+                        }
+                    }
+                    catch {
+                        Write-LogEntry -Value "Error processing subnet for $siteName`: $($_.Exception.Message)" -Severity 2
+                        continue
+                    }
                 }
             }
 
-            # Check WAN IPs if no subnet match
+            # Then check WAN IP matches
             foreach ($siteName in $SITE_CONFIG.Keys) {
                 $siteConfig = $SITE_CONFIG[$siteName]
                 
-                # Skip if no WAN IP defined
-                if ([string]::IsNullOrEmpty($siteConfig.WanIP) -or $siteConfig.WanIP -eq 'TBD') {
-                    continue
-                }
-
-                # Handle multiple WAN IPs
-                $wanIPs = $siteConfig.WanIP -split ';' | ForEach-Object { $_.Trim() }
-                
-                foreach ($wanIP in $wanIPs) {
-                    $wan = $wanIP -replace '/32$', ''  # Remove /32 if present
-                    if ($ip -eq $wan) {
-                        Write-LogEntry -Value "IP $ip matches WAN IP for site $siteName" -Severity 1
-                        return $siteName
+                if (-not [string]::IsNullOrEmpty($siteConfig.WanIP) -and 
+                    $siteConfig.WanIP -ne 'TBD') {
+                    
+                    # Handle multiple WAN IPs properly
+                    $wanIPs = $siteConfig.WanIP -split ';' | 
+                        ForEach-Object { $_.Trim() } | 
+                        Where-Object { -not [string]::IsNullOrEmpty($_) }
+                    
+                    foreach ($wanIP in $wanIPs) {
+                        $wan = $wanIP -replace '/32$', ''  # Remove /32 if present
+                        if (Test-IPAddress $wan -and $ip -eq $wan) {
+                            Write-LogEntry -Value "IP $ip matches WAN IP for site $siteName" -Severity 1
+                            return $siteName
+                        }
                     }
                 }
             }
         }
 
-        Write-LogEntry -Value "No site match found for any IP address" -Severity 2
+        Write-LogEntry -Value "No site match found for any IP address, defaulting to REMOTE" -Severity 2
         return "REMOTE"
     }
     catch {
         Write-LogEntry -Value "Error in Get-SiteFromSubnet: $($_.Exception.Message)" -Severity 3
+        Write-LogEntry -Value "Stack trace: $($_.ScriptStackTrace)" -Severity 3
         return "REMOTE"
     }
 }
-
 
 function Get-DeviceType {
     try {
@@ -610,6 +633,7 @@ try {
     $result = Rename-ComputerBySite -SelectedSite $selectedSite
     if ($result) {
         Write-LogEntry -Value "Computer rename operation completed successfully" -Severity 1
+        Restart-Computer -Force
         Exit 0
     }
     else {
