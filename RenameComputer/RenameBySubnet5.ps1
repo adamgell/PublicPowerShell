@@ -27,6 +27,18 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $false)]
+    [ArgumentCompleter({
+        param($Command, $Parameter, $WordToComplete, $CommandAst, $FakeBoundParams)
+        
+        # Get all site names from $SITE_CONFIG
+        $siteNames = $SITE_CONFIG.Keys | Sort-Object
+        
+        if ([string]::IsNullOrEmpty($WordToComplete)) {
+            return $siteNames
+        }
+        
+        return $siteNames.Where({ $_ -like "$WordToComplete*" })
+    })]
     [string]$Site,
     
     [Parameter(Mandatory = $false)]
@@ -49,120 +61,120 @@ $SITE_CONFIG = @{
         SiteCode      = 'JO'
     }
     'ALPHARETTA'   = @{
-        SubnetPrefix  = ''
-        WanIP         = ''
+        SubnetPrefix  = '10.111.0.0/16'
+        WanIP         = '12.48.212.3/32'
         TimeZone      = 'Eastern Standard Time'
         NamingPattern = 'Full'
         SiteCode      = 'AL'
     }
     'ANTIBES'      = @{
-        SubnetPrefix  = ''
-        WanIP         = ''
+        SubnetPrefix  = '10.200.0.0/16'
+        WanIP         = '81.80.40.201/32'
         TimeZone      = 'Central European Standard Time'
         NamingPattern = 'Partial'
         SiteCode      = 'ANT'
     }
     'BATAM'        = @{
-        SubnetPrefix  = ''
-        WanIP         = ''
+        SubnetPrefix  = 'TBD'
+        WanIP         = '103.246.3.226/32'
         TimeZone      = 'Western Indonesian Time'
         NamingPattern = 'Partial'
         SiteCode      = 'BAT'
     }
     'BINGHAMTON'   = @{
-        SubnetPrefix  = ''
-        WanIP         = ''
+        SubnetPrefix  = '10.2.0.0/16'
+        WanIP         = '4.26.27.126/32'
         TimeZone      = 'Eastern Standard Time'
         NamingPattern = 'Full'
         SiteCode      = 'BI'
     }
     'BURLINGTON'   = @{
-        SubnetPrefix  = ''
-        WanIP         = ''
+        SubnetPrefix  = '10.8.0.0/16'
+        WanIP         = '45.78.180.162/32'
         TimeZone      = 'Eastern Standard Time'
         NamingPattern = 'Full'
         SiteCode      = 'BU'
     }
     'CASARZA'      = @{
-        SubnetPrefix  = ''
-        WanIP         = ''
+        SubnetPrefix  = '10.202.0.0/16'
+        WanIP         = '80.18.250.186/32'
         TimeZone      = 'Central European Standard Time'
         NamingPattern = 'Partial'
         SiteCode      = 'CAS'
     }
     'DURBAN'       = @{
-        SubnetPrefix  = ''
-        WanIP         = ''
+        SubnetPrefix  = '10.121.0.0/16'
+        WanIP         = 'TBD'
         TimeZone      = 'South Africa Standard Time'
         NamingPattern = 'Partial'
         SiteCode      = 'DUR'
     }
     'EL_CAJON'     = @{
-        SubnetPrefix  = ''
-        WanIP         = ''
+        SubnetPrefix  = '10.5.0.0/16'
+        WanIP         = '72.214.7.229/32'
         TimeZone      = 'Pacific Standard Time'
         NamingPattern = 'Full'
         SiteCode      = 'EC'
     }
     'EUFAULA'      = @{
-        SubnetPrefix  = ''
-        WanIP         = ''
+        SubnetPrefix  = '10.110.0.0/16'
+        WanIP         = '142.190.65.35/32'
         TimeZone      = 'Central Standard Time'
         NamingPattern = 'Full'
         SiteCode      = 'EU'
     }
     'LITTLE_FALLS' = @{
-        SubnetPrefix  = ''
-        WanIP         = ''
+        SubnetPrefix  = '112.0.0/16'
+        WanIP         = '69.168.254.36/32'
         TimeZone      = 'Central Standard Time'
         NamingPattern = 'Full'
         SiteCode      = 'LF'
     }
     'MANKATO'      = @{
-        SubnetPrefix  = ''
-        WanIP         = ''
+        SubnetPrefix  = '10.4.0.0/16'
+        WanIP         = '35.131.6.250/32'
         TimeZone      = 'Central Standard Time'
         NamingPattern = 'Full'
         SiteCode      = 'MA'
     }
     'MEXICALI'     = @{
-        SubnetPrefix  = ''
-        WanIP         = ''
+        SubnetPrefix  = '10.3.0.0/16'
+        WanIP         = '187.185.68.122/32'
         TimeZone      = 'Pacific Standard Time'
         NamingPattern = 'Full'
         SiteCode      = 'ME'
     }
     'NUREMBERG'    = @{
-        SubnetPrefix  = ''
-        WanIP         = ''
+        SubnetPrefix  = '10.204.0.0/16'
+        WanIP         = '80.155.138.130/32'
         TimeZone      = 'Central European Standard Time'
         NamingPattern = 'Partial'
         SiteCode      = 'NUR'
     }
     'OLD_TOWN'     = @{
-        SubnetPrefix  = ''
-        WanIP         = ''
+        SubnetPrefix  = '10.7.0.0/16'
+        WanIP         = '72.71.253.50/32'
         TimeZone      = 'Eastern Standard Time'
         NamingPattern = 'Full'
         SiteCode      = 'OT'
     }
     'RACINE'       = @{
-        SubnetPrefix  = ''
-        WanIP         = ''
+        SubnetPrefix  = '10.1.0.0/16'
+        WanIP         = '38.71.70.17/32; 38.71.70.18/32; 38.71.70.19/32'
         TimeZone      = 'Central Standard Time'
         NamingPattern = 'Full'
         SiteCode      = 'RA'
     }
     'TORONTO'      = @{
-        SubnetPrefix  = ''
-        WanIP         = ''
+        SubnetPrefix  = '10.113.0.0/16'
+        WanIP         = '72.139.62.27/32'
         TimeZone      = 'Eastern Standard Time'
         NamingPattern = 'Full'
         SiteCode      = 'TO'
     }
     'SPREITENBACH' = @{
-        SubnetPrefix  = ''
-        WanIP         = ''
+        SubnetPrefix  = '10.203.0.0/16'
+        WanIP         = '194.209.70.154/32'
         TimeZone      = 'Central European Standard Time'
         NamingPattern = 'Partial'
         SiteCode      = 'SPR'
@@ -240,14 +252,9 @@ function Write-LogEntry {
 
 function Test-AdminPrivileges {
     $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
-    $isAdmin = $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-    
-    if (-not $isAdmin) {
-        Write-LogEntry -Value "Script requires administrative privileges" -Severity 3
-        return $false
-    }
-    Write-LogEntry -Value "Script running with administrative privileges" -Severity 1
+    return $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
+
 
 function Invoke-WithRetry {
     param(
@@ -326,30 +333,25 @@ function Get-DevicePrefix {
         [bool]$IsLaptop
     )
     
-    # Validate site exists in config
     $siteName = $SiteName.ToUpper()
     if (-not $SITE_CONFIG.ContainsKey($siteName)) {
         throw "Unknown site: $SiteName"
     }
     
     $siteConfig = $SITE_CONFIG[$siteName]
-    $siteCode = $SITE_CONFIG[$siteName].SiteCode
-    
-    
     
     # Handle special case first
     if ($siteConfig.NamingPattern -eq 'Special') {
         return $(if ($IsLaptop) { 'JOLT-' } else { 'JOPC-' })
     }
     
-    # Build prefix based on pattern
     $suffix = switch ($siteConfig.NamingPattern) {
         'Full' { $(if ($IsLaptop) { 'LT-' } else { 'PC-' }) }
         'Partial' { $(if ($IsLaptop) { 'L-' } else { 'P-' }) }
         default { throw "Invalid naming pattern for site: $SiteName" }
     }
     
-    return "$siteCode$suffix"
+    return "$($siteConfig.SiteCode)$suffix"
 }
 function Get-ComputerNameTemplate {
     param (
@@ -378,9 +380,90 @@ function Get-ComputerNameTemplate {
         throw
     }
 }
-#endregion
 
-# Replace the existing laptop detection with:
+function Get-SiteFromSubnet {
+    try {
+        # Get all IP addresses
+        $ipAddresses = Get-NetIPAddress -AddressFamily IPv4 | 
+            Where-Object { $_.IPAddress -notmatch '^(169\.254\.|127\.)' } |
+            Select-Object -ExpandProperty IPAddress
+        
+        # Get external IP if available
+        $externalIP = Invoke-RestMethod -Uri 'https://api.ipify.org?format=text' -ErrorAction SilentlyContinue
+        if ($externalIP) {
+            $ipAddresses += $externalIP
+        }
+
+        Write-LogEntry -Value "Found IP addresses: $($ipAddresses -join ', ')" -Severity 1
+
+        # Check each IP against site configs
+        foreach ($ip in $ipAddresses) {
+            foreach ($siteName in $SITE_CONFIG.Keys) {
+                $siteConfig = $SITE_CONFIG[$siteName]
+                
+                # Skip if no subnet prefix defined
+                if ([string]::IsNullOrEmpty($siteConfig.SubnetPrefix) -or $siteConfig.SubnetPrefix -eq 'TBD') {
+                    continue
+                }
+
+                # Convert subnet to IP and mask
+                $subnet = $siteConfig.SubnetPrefix -split '/'
+                if ($subnet.Count -ne 2) {
+                    continue
+                }
+
+                $networkIP = [System.Net.IPAddress]::Parse($subnet[0])
+                $maskLength = [int]$subnet[1]
+                $mask = ([Math]::Pow(2, $maskLength) - 1) * [Math]::Pow(2, (32 - $maskLength))
+                $maskBytes = [BitConverter]::GetBytes([UInt32]$mask)
+                [Array]::Reverse($maskBytes)
+                $netMask = [System.Net.IPAddress]::new($maskBytes)
+
+                # Convert IP address to test
+                $ipAddr = [System.Net.IPAddress]::Parse($ip)
+                
+                # Compare network portions
+                $networkAddr = [System.Net.IPAddress]($ipAddr.Address -band $netMask.Address)
+                $subnetAddr = [System.Net.IPAddress]($networkIP.Address -band $netMask.Address)
+                
+                if ($networkAddr.Equals($subnetAddr)) {
+                    Write-LogEntry -Value "IP $ip matches subnet for site $siteName" -Severity 1
+                    return $siteName
+                }
+            }
+
+            # Check WAN IPs if no subnet match
+            foreach ($siteName in $SITE_CONFIG.Keys) {
+                $siteConfig = $SITE_CONFIG[$siteName]
+                
+                # Skip if no WAN IP defined
+                if ([string]::IsNullOrEmpty($siteConfig.WanIP) -or $siteConfig.WanIP -eq 'TBD') {
+                    continue
+                }
+
+                # Handle multiple WAN IPs
+                $wanIPs = $siteConfig.WanIP -split ';' | ForEach-Object { $_.Trim() }
+                
+                foreach ($wanIP in $wanIPs) {
+                    $wan = $wanIP -replace '/32$', ''  # Remove /32 if present
+                    if ($ip -eq $wan) {
+                        Write-LogEntry -Value "IP $ip matches WAN IP for site $siteName" -Severity 1
+                        return $siteName
+                    }
+                }
+            }
+        }
+
+        Write-LogEntry -Value "No site match found for any IP address" -Severity 2
+        return "REMOTE"
+    }
+    catch {
+        Write-LogEntry -Value "Error in Get-SiteFromSubnet: $($_.Exception.Message)" -Severity 3
+        return "REMOTE"
+    }
+}
+
+
 function Get-DeviceType {
     try {
         $systemEnclosure = Get-CimInstance -ClassName Win32_SystemEnclosure
@@ -413,8 +496,13 @@ function Get-DeviceType {
     }
 }
 
-#region 
+
 function Rename-ComputerBySite {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$SelectedSite
+    )
+
     try {
         if ($TestMode) {
             Write-LogEntry -Value "RUNNING IN TEST MODE - No changes will be made" -Severity 2
@@ -435,10 +523,9 @@ function Rename-ComputerBySite {
         }
         Write-LogEntry -Value "Retrieved serial number: $serialNumber" -Severity 1
 
-        # Inside Rename-ComputerBySite, update the name generation section:
         try {
-            Write-LogEntry -Value "Attempting to generate computer name for site: $Site" -Severity 1
-            $newName = Get-ComputerNameTemplate -Site $Site -SerialNumber $serialNumber -IsLaptop ($null -ne $isLaptop)
+            Write-LogEntry -Value "Attempting to generate computer name for site: $SelectedSite" -Severity 1
+            $newName = Get-ComputerNameTemplate -Site $SelectedSite -SerialNumber $serialNumber -IsLaptop $isLaptop
             Write-LogEntry -Value "Successfully generated new name: $newName" -Severity 1
         }
         catch {
@@ -480,63 +567,58 @@ function Rename-ComputerBySite {
     }
 }
 
-# Main execution
-if ($TestMode) {
-    Write-LogEntry -Value "Script started in TEST MODE" -Severity 2
-}
-else {
-    Write-LogEntry -Value "Script started in PRODUCTION MODE" -Severity 1
-}
+#endregion
 
-$siteName = foreach ($site in ($SITE_CONFIG).Keys) {
-    $site
-}
-
-$siteName = $siteName | Sort-Object
-
-#main execution
-
-$serialNumber = Get-MachineSerialNumber
-$isLaptop = $deviceType -eq 'Laptop'
-            
+# Main execution block
 try {
-    $result = Get-ComputerNameTemplate -Site $site -SerialNumber $serialNumber -IsLaptop $isLaptop
-    Write-LogEntry -Value $result -Severity 1 -textcolor "white"
-}
-catch {
-    Write-LogEntry -Value "Failed to generate name for $site ($deviceType): $($_.Exception.Message)" -Severity 3
-}
+    # Initialize logging
+    Ensure-LogDirectory
 
-#testing all naming patterns
-<# function Test-AllNamingPatterns {
-    param (
-        [Parameter(Mandatory = $true)]
-        [array]$Sites
-    )
-    
-    foreach ($deviceType in @('Desktop', 'Laptop')) {
-        $banner = @"
-    ===========================================
-    RENAME COMPUTER BY SITE - $deviceType
-    ===========================================
-"@ 
-        Write-LogEntry -Value $banner -Severity 1
-        
-        foreach ($site in $Sites) {
-            Write-LogEntry -Value "Site: $site" -Severity 1
-            $serialNumber = Get-MachineSerialNumber
-            $isLaptop = $deviceType -eq 'Laptop'
-            
-            try {
-                $result = Get-ComputerNameTemplate -Site $site -SerialNumber $serialNumber -IsLaptop $isLaptop
-                Write-LogEntry -Value $result -Severity 1 -textcolor "white"
-            }
-            catch {
-                Write-LogEntry -Value "Failed to generate name for $site ($deviceType): $($_.Exception.Message)" -Severity 3
-            }
+    # Log script start (only once)
+    if ($TestMode) {
+        Write-LogEntry -Value "Script started in TEST MODE" -Severity 2
+    }
+    else {
+        Write-LogEntry -Value "Script started in PRODUCTION MODE" -Severity 1
+    }
+
+    # Check admin privileges
+    if (-not (Test-AdminPrivileges)) {
+        Write-LogEntry -Value "Script requires administrative privileges" -Severity 3
+        Exit 1
+    }
+    Write-LogEntry -Value "Script running with administrative privileges" -Severity 1
+
+    # Determine site
+    $selectedSite = if ($Site) {
+        $uppercaseSite = $Site.ToUpper()
+        if (-not $SITE_CONFIG.ContainsKey($uppercaseSite)) {
+            Write-LogEntry -Value "Invalid site specified: $uppercaseSite" -Severity 3
+            Exit 1
         }
+        Write-LogEntry -Value "Using provided site: $uppercaseSite" -Severity 1
+        $uppercaseSite
+    }
+    else {
+        Write-LogEntry -Value "No site provided, detecting from subnet..." -Severity 1
+        Get-SiteFromSubnet
+    }
+
+    Write-LogEntry -Value "Selected site: $selectedSite" -Severity 1
+
+    # Execute rename operation with selected site
+    $result = Rename-ComputerBySite -SelectedSite $selectedSite
+    if ($result) {
+        Write-LogEntry -Value "Computer rename operation completed successfully" -Severity 1
+        Exit 0
+    }
+    else {
+        Write-LogEntry -Value "Computer rename operation failed" -Severity 3
+        Exit 1
     }
 }
-
-Test-AllNamingPatterns -Sites $siteName #>
-
+catch {
+    Write-LogEntry -Value "Unhandled error in script execution: $($_.Exception.Message)" -Severity 3
+    Write-LogEntry -Value "Stack trace: $($_.ScriptStackTrace)" -Severity 3
+    Exit 1
+}
