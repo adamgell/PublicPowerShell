@@ -1,14 +1,16 @@
-# Check if Company Portal is installed
+#Name of the application to install
 $AppName = "Microsoft.CompanyPortal"
-$Package = Get-AppxPackage | Where-Object {$_.Name -eq $AppName}
+# Shortcut name that appears on the desktop. Make sure to include the .lnk extension.
+$shortcutName = "Company Portal.lnk"
+# Package Family Name of the application. This can be tricky to find. Get-AppxPackage *nameofapp* will show you the package family name.
+$packageFamilyName = "Microsoft.CompanyPortal_8wekyb3d8bbwe"
+# Application ID of the application. This can be tricky to find as well. If its a store app. then we need to check apps.microsoft.com for the ID in the URL.
+$applicationId = "9wzdncrfj3pz"
+# SKU ID of the application. Most likely this can be left alone
+$skuId = 0016
 
 if (-not $Package) {
-    Write-Host "Company Portal not found. Installing..."
-    
-    $applicationId = "9wzdncrfj3pz"
-    $skuId = 0016
-    $packageFamilyName = "Microsoft.CompanyPortal_8wekyb3d8bbwe"
-
+    Write-Host "$appName not found. Installing..."
     $namespaceName = "root\cimv2\mdm\dmmap"
     $session = New-CimSession
     $omaUri = "./Vendor/MSFT/EnterpriseModernAppManagement/AppInstallation"
@@ -17,6 +19,7 @@ if (-not $Package) {
     $newInstance.CimInstanceProperties.Add($property)
     $property = [Microsoft.Management.Infrastructure.CimProperty]::Create("InstanceID", $packageFamilyName, "String", "Key")
     $newInstance.CimInstanceProperties.Add($property)
+    $Package = Get-AppxPackage | Where-Object {$_.Name -eq $AppName}
 
     $flags = 0
     $paramValue = [Security.SecurityElement]::Escape($('<Application id="{0}" flags="{1}" skuid="{2}"/>' -f $applicationId, $flags, $skuId))
@@ -34,7 +37,7 @@ if (-not $Package) {
         $timeout = 300 # 5 minutes
         $timer = [Diagnostics.Stopwatch]::StartNew()
         
-        Write-Host "Waiting for Company Portal installation to complete..."
+        Write-Host "Waiting for $appName installation to complete..."
         do {
             Start-Sleep -Seconds 10
             $Package = Get-AppxPackage | Where-Object {$_.Name -eq $AppName}
@@ -60,7 +63,7 @@ if (-not $Package) {
 if ($Package) {
     try {
         $WScriptShell = New-Object -ComObject WScript.Shell
-        $ShortcutPath = "$env:PUBLIC\Desktop\Company Portal.lnk"
+        $ShortcutPath = "$env:PUBLIC\Desktop\$shortcutName"
         
         $PackageFamilyName = $Package.PackageFamilyName
         $ApplicationId = "App"
@@ -80,6 +83,6 @@ if ($Package) {
         exit 1
     }
 } else {
-    Write-Host "Error: Failed to install or locate Company Portal."
+    Write-Host "Error: Failed to install or locate $appName ."
     exit 1
 }
